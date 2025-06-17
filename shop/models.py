@@ -22,6 +22,7 @@ class Category(models.Model):
     image = models.ImageField(upload_to=getFilename,null=True,blank=True) 
     description = models.TextField(max_length=500,null=False,blank=False) 
     status = models.BooleanField(default=False,help_text='0-show,1-hidden')
+    trending = models.BooleanField(default=False,help_text='0-show,1-hidden')
     created_at = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return self.name

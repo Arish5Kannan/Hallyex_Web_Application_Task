@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 urlpatterns = [
     path('',views.home,name="home"),
+    path('google-login-direct/',views.google_login_redirect,name="google-login-direct"),
     path('register/',views.register,name="register"),
     path('collection/',views.collection,name="collections"),
     path('collections/<str:name>/',views.products,name="collections"),

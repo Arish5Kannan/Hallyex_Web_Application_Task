@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import render,redirect,get_object_or_404,reverse
 from .models import *
 from shop.forms import CustomUserForm
 from django.contrib.auth import authenticate,login,logout
@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -61,7 +62,9 @@ def login_page(request):
     return render(request,'shop/login.html')     
 def collection(request):
     catagory = Category.objects.filter(status=0)
-    return render(request,"shop/collections.html",{"catagory":catagory})
+    category = Category.objects.filter(trending=1)
+    prod = Product.objects.filter(trending=1)
+    return render(request,"shop/collections.html",{"prods":prod,"catagory":catagory,"trending_category":category})
 def products(request,name):
     if(Category.objects.filter(status=0,name=name)):
         prod = Product.objects.filter(category__name=name) 
@@ -375,4 +378,7 @@ def forgot_password_processing(request):
             return JsonResponse({'info':'Oops! sorry','status':'Something went wrong'},status=200)
     else :
         return JsonResponse({'status':'Invalid Access'},status=200)
+    
+def google_login_redirect(request):
+    return redirect("/accounts/google/login/?process=login")
     

@@ -8,23 +8,29 @@
 {% block content %}
 
 <!-- Hero Section -->
-<section class="hero bg-dark text-white text-center py-5">
+<!-- Hero Section -->
+<section class="hero bg-white text-white text-center py-5">
     <div class="container">
-        <h1 class="fw-bold">Explore Our Categories</h1>
-        <p class="lead">Find the best products across various categories. Choose what suits you best!</p>
+        <h1 class="fw-bold text-dark">Explore Our Popular Categories</h1>
+        <p class="lead text-muted">Find the best products across various categories. Choose what suits you best!</p>
 
-        
+        <!-- Multiple Category Images -->
+        <div class="row justify-content-center mt-5 g-5">
+    {% for img in trending_category %}
+    
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <a href="{% url 'collections' img.name %}">
+                   <img src="{{ img.image.url }}" class="img-fluid " alt="Category Image">
+    </a>
         </div>
-
-        <!-- Category Image -->
-        <div class="row mt-5">
-            <div class="col-md-12">
-                <img src="
-                https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTP9dsD39rGdMnbdv1SwgXn4oVVbmWkneOARw&s" class="img-fluid  rounded" alt="Categories Banner" style="width:250px;height:100px;">
-            </div>
-        </div>
+    
+    
+    {% endfor %}
+</div>
     </div>
 </section>
+
+ 
 
 
 {% if not request.user.is_authenticated %}
@@ -46,7 +52,7 @@
 
 
 <!-- Categories Section -->
-<section class="bg-light py-4 my-1">
+ <section class="bg-light py-4 ">
     <div class="container">
         <div class="row">
             <div class="col-12 my-3">
@@ -71,15 +77,38 @@
             {% endfor %}
         </div>
     </div>
-</section>
+</section> 
 
-<!-- Trending Products CTA -->
-<section class="trending-products bg-dark text-white text-center py-5">
-    <div class="container">
-        <h2>Trending Products 🔥</h2>
-        <p>Discover the hottest selling products now!</p>
-        <a href="{% url 'home' %}" class="btn btn-light btn-lg">Shop Now</a>
-    </div>
+{% comment %} Trending products display section {% endcomment %}
+<section class="bg-light">
+ <div class="container" style="margin-top: 0px;">
+   <div class="row">
+    <div class="col-12 ">
+      <h4 class="text-white bg-dark px-3 py-2 d-inline-block" style="margin-top: 30px;border-radius:10px;">Trending sales <i class="fas fa-cart-shopping"></i></h4>
+      <hr style="border-color:#404141;"></div>
+      {% for a in prods %}
+      <div class="col-md-4 col-lg-3">
+          <div class="card my-3 trendy" style="border: none; box-shadow: 2px 3px 4px 2px #807f7f3b;">
+              {% if a.product_image %}
+                  <img src="{{ a.product_image.url }}" class="card-image-top mx-auto d-block" alt="categories logo" style="width:150px;height:160px;margin-top: 3%;">
+              {% else %}
+                  <img src="{% static 'images/tick.jpeg' %}" class="card-image-top mx-auto d-block" alt="default image" style="width:150px;height:160px;margin-top: 3%;">
+              {% endif %}
+              <hr style="border-color: #404141;margin:2% 0 0 0;">
+              <a href="{% url 'product_details' a.category a.name %}" style="color:initial;">
+                  <div class="card-body">
+                      <h5 class="card-title text-primary" style="padding-bottom:6px;">{{a.name}}</h5>
+                      <p class="card-text">
+                          <span class="float-start old_price"><s>₹{{a.old_price |stringformat:'d'}} </s></span>
+                          <span class="float-end new_price">₹{{a.new_price |stringformat:'d'}}</span>
+                      </p>
+                  </div>
+              </a>
+          </div>
+      </div>
+  {% endfor %}
+   </div>
+ </div>
 </section>
 
 {% endblock content %}

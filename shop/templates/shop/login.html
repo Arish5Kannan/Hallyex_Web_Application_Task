@@ -1,4 +1,4 @@
-{% extends 'shop/layouts/main.html' %}
+{% extends 'shop/layouts/main1.html' %}
 {% load static %}
 {% block title %}
 ShopKart | Login
@@ -24,15 +24,23 @@ ShopKart | Login
               <label for="password" class="form-label">Password</label>
               <input type="password" required name="password" id="password" class="form-control custom-input">
             </div>
-            <button type="submit" id="login" class="btn btn-dark w-100  mt-3"style="padding:10px;">
+            <button type="submit" id="login" class="btn btn-primary w-100  mt-3"style="padding:10px;">
               <i class="fa fa-sign-in"></i> Login
             </button>
-            <button type="reset" class="btn btn-primary w-100  mt-3"style="padding:10px;">
-              <i class="fa fa-refresh"></i> Reset
-            </button>
-            <p class="my-2 text-center"> <a href="{% url 'forgot_password' %}" class="text-danger">Forgot Password </a></p>
+          
+      {% load socialaccount %}
+       <a href="{% url 'google-login-direct' %}" 
+   class="btn btn-dark w-100 mt-3 d-flex align-items-center justify-content-center" style="padding:10px;">
+  <img src="{% static '/images/google.png' %}" alt="Google" width="24" height="24" class="me-2">
+  Sign in with Google
+</a>
+
+
+
+            <p class="my-2 text-left "> <a href="{% url 'forgot_password' %}" class="text-danger" style="font-size:13px;">Forgot Password ?</a></p>
+            <p class="my-2 text-center">New user? <a href="{% url 'register' %}" class="text-primary">Register</a></p>
+
           </form>
-          <p class="my-2 text-center">New user? <a href="{% url 'register' %}" class="text-primary">Register</a></p>
         </div>
       </div>
     </section>
