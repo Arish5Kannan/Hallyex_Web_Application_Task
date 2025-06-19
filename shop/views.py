@@ -3,13 +3,114 @@ from .models import *
 from shop.forms import CustomUserForm
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponseBadRequest
 import json
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import razorpay
+from django.views.decorators.csrf import csrf_exempt
 
+#Authorize razorpay with API Keys
+razorpay_client = razorpay.Client(auth=(
+    settings.RAZOR_KEY_ID,settings.RAZOR_KEY_SECRET
+))
+def convert_to_subunit(amount, factor=100):
+    subunit = int(round(amount * factor))
+    return subunit
+
+@login_required(login_url="/login/")
+def cart(request):
+    cartitems = Cart.objects.filter(user=request.user)
+    total_price = sum(item.product.new_price * item.product_qty for item in cartitems)
+    
+    context = {
+        'carts': cartitems
+    }
+
+    if total_price > 0 and cartitems.exists():
+        currency = 'INR'
+        amount = convert_to_subunit(total_price)
+        razorpay_order = razorpay_client.order.create(
+            dict(
+                amount=amount,
+                currency=currency,
+                payment_capture='0'
+            )
+        )
+        razorpay_order_id = razorpay_order['id']
+        callback_url = 'paymenthandler/'
+
+        context.update({
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_amount': amount,
+            'razorpay_merchant_key': settings.RAZOR_KEY_ID,
+            'currency': currency,
+            'callback_url': callback_url
+        })
+
+    return render(request, 'shop/cart.html', context=context)
+@csrf_exempt
+def paymenthandler(request):
+
+    # only accept POST request.
+    if request.method == "POST":
+        try:
+            cart_items = Cart.objects.filter(user=request.user)
+            # Calculate total order price
+            total_price = sum(item.product.new_price * item.product_qty for item in cart_items)
+
+            # get the required parameters from post request.
+            payment_id = request.POST.get('razorpay_payment_id', '')
+            razorpay_order_id = request.POST.get('razorpay_order_id', '')
+            signature = request.POST.get('razorpay_signature', '')
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': payment_id,
+                'razorpay_signature': signature
+            }
+
+            # verify the payment signature.
+            result = razorpay_client.utility.verify_payment_signature(
+                params_dict)
+            if result is not None:
+                amount = convert_to_subunit(total_price)  # Rs. 200
+                try:
+
+                    # capture the payemt
+                    razorpay_client.payment.capture(payment_id, amount)
+                    order = Orders.objects.create(user=request.user, total_price=total_price)
+                    # Move Cart items to OrderItem
+                    for cart_item in cart_items:
+                        OrderItem.objects.create(
+                            order=order,
+                            product=cart_item.product,
+                            quantity=cart_item.product_qty,
+                            price=cart_item.product.new_price
+                        )
+
+                    # Clear Cart
+                    cart_items.delete()
+
+                    # render success page on successful caputre of payment
+                    return render(request, 'shop/paymentsuccess.html')
+                except:
+
+                    # if there is an error while capturing payment.
+                    return render(request, 'shop/paymentfail.html')
+            else:
+
+                # if signature verification fails.
+                return render(request, 'shop/paymentfail.html')
+        except:
+
+            # if we don't find the required parameters in POST data
+            return HttpResponseBadRequest()
+    else:
+       # if other than POST request is made.
+        return HttpResponseBadRequest()
+    
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -105,10 +206,7 @@ def add_to_cart(request):
     else :
         return JsonResponse({'status':'Invalid Access'},status=200) 
 
-@login_required(login_url="/login/")
-def cart(request):
-    cartitems = Cart.objects.filter(user=request.user)
-    return render(request,'shop/cart.html',{'carts':cartitems})  
+ 
 def remove_cart(request):
    if request.user.is_authenticated: 
      data = json.load(request)
@@ -208,33 +306,6 @@ def remove_fav(request):
     favourite.delete()
     return JsonResponse({'status':'Favourite product has been removed successfully'},status=200)
 
-def place_order(request):
-    if request.method == "POST":
-        cart_items = Cart.objects.filter(user=request.user)
-
-        if not cart_items:
-            return redirect('cart')  # Redirect if cart is empty
-
-        # Calculate total order price
-        total_price = sum(item.product.new_price * item.product_qty for item in cart_items)
-
-        # Create an Order
-        order = Orders.objects.create(user=request.user, total_price=total_price)
-
-        # Move Cart items to OrderItem
-        for cart_item in cart_items:
-            OrderItem.objects.create(
-            order=order,
-            product=cart_item.product,
-            quantity=cart_item.product_qty,
-            price=cart_item.product.new_price
-        )
-
-        # Clear Cart
-        cart_items.delete()
-
-        return JsonResponse({"status":"Your order has been placed successfully"},status=200)
-    return JsonResponse({"status": "error", "message": "Invalid request!"},status=200)  
 def delete_fav(request):
     if request.user.is_authenticated:
         favs = Favourite.objects.filter(user=request.user)  

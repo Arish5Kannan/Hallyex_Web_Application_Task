@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment Failed</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .fail-card {
+      
+      padding: 3rem;
+      text-align: center;
+      max-width: 500px;
+      margin: 5rem auto;
+      animation: slideDown 0.8s ease;
+    }
+    .cross-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #dc3545;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem auto;
+    }
+    .crossmark {
+      color: white;
+      font-size: 2.5rem;
+    }
+    .btn-custom {
+      margin: 0.5rem;
+      border-radius: 30px;
+      padding: 0.6rem 2rem;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="fail-card">
+    <div class="cross-circle">
+      <i class="crossmark">&times;</i>
+    </div>
+    <h2 class="text-danger">Payment Failed</h2>
+    <p class="text-muted">Oops! Something went wrong during the transaction. Please try again or contact support if the issue persists.</p>
+
+    <div class="d-flex justify-content-center">
+      <a href="/cart" class="btn btn-danger btn-custom">Retry Payment</a>
+      <a href="/contact-support" class="btn btn-outline-dark btn-custom">Contact Support</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

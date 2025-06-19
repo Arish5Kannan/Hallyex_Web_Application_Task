@@ -32,7 +32,6 @@ SITE_ID = 2
 
 INSTALLED_APPS = [
     'jazzmin',
-    'accounts',
     'rest_framework',
     'rest_framework_simplejwt',
     'shop',
@@ -171,10 +170,10 @@ AUTHENTICATION_BACKENDS = [
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 SOCIALACCOUNT_AUTO_SIGNUP = True
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False  
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*'] 
 SOCIALACCOUNT_QUERY_EMAIL = True
-ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_EMAIL_VERIFICATION = "none"  
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
@@ -186,9 +185,17 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 # Email credentials for Gmail SMTP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587  # Use 465 if EMAIL_USE_SSL = True
-EMAIL_USE_TLS = True   # Must be True for port 587
-EMAIL_USE_SSL = False  # Must be False for TLS
+EMAIL_PORT = 587  
+EMAIL_USE_TLS = True   
+EMAIL_USE_SSL = False  
 EMAIL_HOST_USER = 'arishkannan941@gmail.com'
-EMAIL_HOST_PASSWORD = 'jpax afax rfjf smvc'  # Use an App Password instead of your actual password!
+EMAIL_HOST_PASSWORD = 'jpax afax rfjf smvc'  
 
+
+#Razorpay paymentgateway credentials
+RAZOR_KEY_ID = 'rzp_test_wjD64tq2u5TubG'
+RAZOR_KEY_SECRET = 'KqFJBFMnqVgYCIONaiRIuAe8'
+
+#live keys
+# RAZOR_KEY_ID = 'rzp_live_Tbqb5QQUesLHMx'
+# RAZOR_KEY_SECRET = 'NV7Zs2MCfBeJCxDLK69jT98U'
