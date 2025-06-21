@@ -119,8 +119,34 @@
     border-color: #f78c1e;
     box-shadow: 0px 0px 10px rgba(247, 120, 17, 0.5);
 }
-   
-  
+ 
+        @keyframes slide{
+    from {
+        transform:translateX(0%);
+    }
+    to {
+        transform:translateX(-100%);
+    }
+ }  
+.logos-slide{
+    
+    display: inline-block;
+    animation:5s slide infinite linear;
+}
+.logos:hover .logos-slide{
+    animation-play-state:paused;
+}
+.logos{
+    white-space:nowrap;
+    overflow:hidden;
+    padding:50px 0;
+    background:white;
+ 
+}
+ .logos-slide img{
+    height:100px;
+    margin:0 40px;
+ } 
   
   </style>
   </head>
