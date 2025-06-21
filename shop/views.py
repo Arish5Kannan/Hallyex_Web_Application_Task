@@ -11,11 +11,16 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 import razorpay
 from django.views.decorators.csrf import csrf_exempt
+import os
+
 
 #Authorize razorpay with API Keys
 razorpay_client = razorpay.Client(auth=(
     settings.RAZOR_KEY_ID,settings.RAZOR_KEY_SECRET
 ))
+
+
+
 def convert_to_subunit(amount, factor=100):
     subunit = int(round(amount * factor))
     return subunit
@@ -131,10 +136,10 @@ def register(request):
         form = CustomUserForm(request.POST)
         if form.is_valid():
             form.save()
-            return JsonResponse({"status": "success", "message": "Registration successful!"}, status=200)
+            return JsonResponse({"status": "success", "message": "You have successfully registered"}, status=200)
         else:
             errors = {field: error.get_json_data()[0]['message'] for field, error in form.errors.items()}
-            return JsonResponse({"status": "failure", "message": "Invalid values found", "errors": errors}, status=400)
+            return JsonResponse({"status": "failure", "message": "You have not successfully registered", "errors": errors}, status=400)
 
     form = CustomUserForm()
     return render(request, "shop/register.html", {"form": form})
@@ -433,7 +438,6 @@ def forgot_password_processing(request):
                 <p>For security reasons, this link will expire in 24 hours.</p>
             </div>
             <div class="footer">
-                <p>&copy; 2024 Your Company Name. All rights reserved.</p>
                 <p>For support, <a href="mailto:support@example.com">contact us</a>.</p>
             </div>
         </div>

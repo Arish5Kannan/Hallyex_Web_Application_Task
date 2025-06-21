@@ -62,7 +62,7 @@
           {% if request.user.is_authenticated %}
           <a class="nav-link link-items " href="{% url 'orders' %}"><i class="fa fa-cart-plus"></i> Orders</a>
           <a class="nav-link link-items " href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Logout</a>
-           <a class="nav-link link-items " style="background-color: #ff4500;color:white;border-radius:5px !important;padding-leftt:5px;" href="#"><i class="fa fa-user" style="background-color: aliceblue;color: black;padding: 4px;border-radius: 12px;"></i> {{request.user}}</a>
+           <a class="nav-link link-items " style="color:white;border-radius:5px !important;padding-leftt:5px;" href="#"><i class="fa fa-user" style="background-color: aliceblue;color: black;padding: 4px;border-radius: 12px;"></i> {{request.user}}</a>
          {% else %}
          <a class="nav-link link-items " href="{% url 'register' %}"><i class="fa fa-users"></i> Register</a>
           <a class="nav-link link-items " href="{% url 'login' %}"><i class="fa fa-sign-in"></i> Login</a>

@@ -177,25 +177,20 @@ ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_EMAIL_VERIFICATION = "none"  
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-
-
-
-
-
+#OpenAI API KEY SECRET
+import os
+from dotenv import load_dotenv
+load_dotenv()
 # Email credentials for Gmail SMTP
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587  
-EMAIL_USE_TLS = True   
-EMAIL_USE_SSL = False  
-EMAIL_HOST_USER = 'arishkannan941@gmail.com'
-EMAIL_HOST_PASSWORD = 'jpax afax rfjf smvc'  
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+EMAIL_HOST = os.getenv('smtp.gmail.com')
+EMAIL_PORT = os.getenv('EMAIL_PORT')  
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')   
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL')  
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  
 
 
 #Razorpay paymentgateway credentials
-RAZOR_KEY_ID = 'rzp_test_wjD64tq2u5TubG'
-RAZOR_KEY_SECRET = 'KqFJBFMnqVgYCIONaiRIuAe8'
-
-#live keys
-# RAZOR_KEY_ID = 'rzp_live_Tbqb5QQUesLHMx'
-# RAZOR_KEY_SECRET = 'NV7Zs2MCfBeJCxDLK69jT98U'
+RAZOR_KEY_ID = os.getenv('RAZOR_KEY_ID')
+RAZOR_KEY_SECRET = os.getenv('RAZOR_KEY_SECRET')

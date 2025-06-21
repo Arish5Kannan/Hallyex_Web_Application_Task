@@ -1,21 +1,21 @@
-{% extends 'shop/layouts/main.html' %}
+{% extends 'shop/layouts/main1.html' %}
 {% load static %}
 {% block title %}
 ShopKart | Register
 {% endblock title %}        
 {% block content %}
 
-<div class="container-fluid bg-light d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-  <div class="container my-5">
-    <section class="py-4 d-flex justify-content-center align-items-center my-4">
-      <div class="row my-3 justify-content-center w-100">
+<div class="container-fluid bg-dark d-flex justify-content-center align-items-end" style="min-height: 100vh;">
+  <div class="container">
+    <section class="py-4 d-flex justify-content-center align-items-end my-1">
+      <div class="row my-3 justify-content-end w-100">
         <div class="col-lg-5 col-md-6 col-sm-10 col-12">
           <form id="registerForm" class="shadow w-100 p-4 bg-white rounded" style="max-width: 500px; margin: auto;">
             {% csrf_token %}
             <div class="text-center position-relative">
-              <i class="fa fa-user bg-white p-4 rounded-circle shadow" 
-                 style="font-size: 50px; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);"></i>
-            </div>
+              <img src="{% static "/images/auth-modified.png" %}" class="img-thumbnail" 
+                 style="width:100px;height:100px;border-radius:50%; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);">
+            </div> 
 
             <div class="mb-3 mt-5">
               <label for="username" class="form-label">Username</label>
@@ -44,10 +44,11 @@ ShopKart | Register
             <button type="submit" class="btn btn-dark w-100 mt-1" style="padding:10px;">
               <i class="fa fa-user-plus"></i> Register
             </button>
-          </form>
-          <p class="my-2 text-center">Already a user? 
+            <p class="my-2 text-center">Already a user? 
             <a href="{% url 'login' %}" class="text-primary">Login</a>
           </p>
+          </form>
+          
         </div>
       </div>
     </section>

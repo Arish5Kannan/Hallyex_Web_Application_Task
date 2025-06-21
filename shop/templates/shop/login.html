@@ -4,17 +4,17 @@
 ShopKart | Login
 {% endblock title %}        
 {% block content %}
-<div class="container-fluid bg-light d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+<div class="container-fluid bg-dark d-flex justify-content-end align-items-center" style="min-height: 100vh;">
   <div class="container">
-    <section class="py-4 my-5 d-flex justify-content-center align-items-center">
-      <div class="row justify-content-center w-100 mt-5">
+    <section class="py-4  d-flex justify-content-end align-items-center">
+      <div class="row justify-content-end w-100 mt-1">
         <div class="col-lg-5 col-md-6 col-sm-10 col-12">
           <form action="" class="shadow w-100" method="POST" 
                 style="padding: 20px; border-radius: 10px; background: #fff; max-width: 500px; margin: auto;">
             {% csrf_token %}
-            <div class="text-center position-relative">
-              <i class="fa fa-user bg-white p-4 rounded-circle shadow" 
-                 style="font-size: 50px; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);"></i>
+            <div class="text-center  position-relative ">
+              <img src="{% static "/images/auth-modified.png" %}" class=" img-thumbnail" 
+                 style="width:100px;height:100px;border-radius:50%; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);">
             </div>
             <div class="mb-3 mt-5">
               <label for="username" class="form-label">User Name</label>
