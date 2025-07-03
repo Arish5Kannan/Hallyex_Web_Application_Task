@@ -21,17 +21,34 @@
               <a class="nav-link link-items" href="{% url 'collections' %}">
                   <i class="fa fa-cubes"></i> Collections
               </a>
-              <a class="nav-link link-items" href="{% url 'cart' %}">
-                  <i class="fa fa-cart-shopping"></i> Cart
-              </a>
-              <a class="nav-link link-items" href="{% url 'favview' %}">
-                  <i class="fa fa-heart"></i> Whishlist
-              </a>
+              <a class="nav-link link-items position-relative" href="{% url 'cart' %}">
+  <i class="fa fa-cart-shopping"></i> Cart
+  {% if cart_count > 0 %}
+    <span  class="position-absolute py-1 px-2 top-1  start-100 translate-middle badge rounded-pill bg-danger">
+      {{ cart_count }}
+    </span>
+  {% endif %}
+</a>
+
+              <a class="nav-link link-items position-relative" href="{% url 'favview' %}">
+  <i class="fa fa-heart"></i> Wishlist
+  {% if Whishlist_count > 0 %}
+    <span class="position-absolute top-1 py-1 px-2 start-100 translate-middle badge rounded-pill bg-danger">
+      {{ Whishlist_count }}
+    </span>
+  {% endif %}
+</a>
+
 
               {% if request.user.is_authenticated %}
-                  <a class="nav-link link-items" href="{% url 'orders' %}">
-                      <i class="fa fa-cart-plus"></i> Orders
-                  </a>
+                  <a class="nav-link link-items position-relative" href="{% url 'orders' %}">
+  <i class="fa fa-cart-plus"></i> Orders
+  {% if Orders_count > 0 %}
+    <span class="position-absolute top-1 py-1 px-2 start-00 translate-middle badge rounded-pill bg-danger">
+      {{ Orders_count }}
+    </span>
+  {% endif %}
+</a>
                   
                   <a class="nav-link user-highlight" href="{% url 'profile' %}">
                       <i class="fa fa-user"></i> {{ request.user }}
@@ -57,10 +74,20 @@
         <div class="navbar-nav ms-auto links-shop">
           <a class="nav-link link-items " aria-current="page" href="{% url 'home' %}" ><i class="fa fa-home " ></i> Home</a>
           <a class="nav-link link-items " href="{% url 'collections' %}"><i class="fa fa-cubes"></i> Collections</a>
-          <a class="nav-link link-items " href="{% url 'cart' %}"><i class="fa fa-cart-shopping"></i> Cart</a>
-          <a class="nav-link link-items " href="{% url 'favview' %}"><i class="fa fa-heart"></i> Favourites</a>
+          <a class="nav-link link-items " href="{% url 'cart' %}"><i class="fa fa-cart-shopping"></i> Cart
+         {% if cart_count > 0 %}
+    <span class="badge rounded-pill bg-danger ms-1">{{ cart_count }}</span>
+  {% endif %}
+</a>
+          <a class="nav-link link-items " href="{% url 'favview' %}"><i class="fa fa-heart"></i> Whishlist
+         {% if cart_count > 0 %}
+    <span class="badge rounded-pill bg-danger ms-1">{{ Whishlist_count }}</span>
+  {% endif %}</a>
           {% if request.user.is_authenticated %}
-          <a class="nav-link link-items " href="{% url 'orders' %}"><i class="fa fa-cart-plus"></i> Orders</a>
+          <a class="nav-link link-items " href="{% url 'orders' %}"><i class="fa fa-cart-plus"></i> Orders
+          {% if Whishlist_count > 0 %}
+    <span class="badge rounded-pill bg-danger ms-1">{{ Orders_count }}</span>
+  {% endif %}</a>
           <a class="nav-link link-items " href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Logout</a>
            <a class="nav-link link-items " style="color:white;border-radius:5px !important;padding-leftt:5px;" href="#"><i class="fa fa-user" style="background-color: aliceblue;color: black;padding: 4px;border-radius: 12px;"></i> {{request.user}}</a>
          {% else %}

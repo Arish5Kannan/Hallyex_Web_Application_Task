@@ -1,15 +1,44 @@
 {% extends 'shop/layouts/main1.html' %}
 {% load static %}
+
 {% block title %}
 ShopKart | Login
-{% endblock title %}        
+{% endblock title %}
+
 {% block content %}
-<div class="container-fluid bg-dark d-flex justify-content-end align-items-center" style="min-height: 100vh;">
+
+<div style="
+  margin-top: 0;
+  background-image: linear-gradient(160deg, rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "images/auth_background_img.webp" %}');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: scroll;
+  min-height: 100vh;
+  overflow-y:hidden;
+" class="container-fluid d-flex align-items-center justify-content-center py-5">
+
   <div class="container">
-    <section class="py-4  d-flex justify-content-end align-items-center">
-      <div class="row justify-content-end w-100 mt-1">
-        <div class="col-lg-5 col-md-6 col-sm-10 col-12">
-          <form action="" class="shadow w-100" method="POST" 
+    <section class="row justify-content-center align-items-center g-4">
+
+      <!-- LEFT SIDE: shopping content -->
+      <div  style="overflow:hidden;"class="col-lg-6 col-md-6 text-white text-center d-flex flex-column justify-content-center align-items-center p-4">
+        <div>
+          <h2 class="fw-bold mb-3">Welcome to ShopKart</h2>
+          <p class="lead mb-3">Join thousands of happy shoppers today!</p>
+          <ul class="list-unstyled text-start mx-auto" style="max-width: 300px;">
+            <li class="mb-2"><i class="fa fa-check-circle text-success"></i> Exclusive member-only discounts</li>
+            <li class="mb-2"><i class="fa fa-check-circle text-success"></i> Faster checkout experience</li>
+            <li class="mb-2"><i class="fa fa-check-circle text-success"></i> Track orders easily</li>
+            <li class="mb-2"><i class="fa fa-check-circle text-success"></i> Save your wishlist</li>
+          </ul>
+          <p class="mt-3">Experience the best shopping journey with ShopKart.</p>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE: register form -->
+      <div class="col-lg-5 col-md-6 col-sm-10 col-12 position-relative" >
+       <form action="" class="shadow w-100" method="POST" 
                 style="padding: 20px; border-radius: 10px; background: #fff; max-width: 500px; margin: auto;">
             {% csrf_token %}
             <div class="text-center  position-relative ">
@@ -41,16 +70,20 @@ ShopKart | Login
             <p class="my-2 text-center">New user? <a href="{% url 'register' %}" class="text-primary">Register</a></p>
 
           </form>
-        </div>
       </div>
+
     </section>
   </div>
 </div>
 
+<!-- Popup Modal -->
 {% include 'shop/inc/alert.html' %}
+
+<!-- Loader -->
 {% include 'shop/inc/loader.html' %}
 
-   <script>
+<!-- JavaScript for AJAX Registration -->
+<script>
 document.addEventListener("DOMContentLoaded",function(event){
 const btnLogin = document.getElementById("login");
 const username = document.getElementById("username");
@@ -78,7 +111,7 @@ fetch("{% url 'login' %}", {
   console.log(data['status']);
   loader.style.display="none";
   if(data['status'] == 'Login success'){
-    showPopup("Congratulations!", data['status'],'success');
+    showPopup("Congratulations!","You have loggined successfully",'success');
   }
   else{
     showPopup("Oops! sorry", data['status'],'failure');
@@ -140,5 +173,6 @@ function showPopup(greeting, message, hint) {
   }
 }
 
-   </script> 
- {% endblock content %}   
+</script>
+
+{% endblock %}

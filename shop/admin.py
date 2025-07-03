@@ -5,4 +5,6 @@ admin.site.register(Category)
 admin.site.register(Product)
 admin.site.register(Cart)
 admin.site.register(Favourite)
+admin.site.register(Profile)
+admin.site.register(Orders)
 

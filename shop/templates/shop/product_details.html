@@ -60,8 +60,7 @@ ShopKart | {{prod}}
     </div>
  </div>
  </section>
- {% include 'shop/inc/loader.html' %}
- {% include 'shop/inc/alert.html' %}
+ 
  <script>
     document.addEventListener("DOMContentLoaded",function(event){
         const btnplus = document.getElementById('btnplus');
@@ -103,7 +102,7 @@ ShopKart | {{prod}}
            
           }
           console.log(postObject)
-          fetch("/add_to_cart",{
+          fetch("{% url "add_to_cart" %}",{
           method: 'POST',
           credentials: 'same-origin',
           headers:{
@@ -136,7 +135,7 @@ btnFav.addEventListener("click", function() {
          'pid': pid.value
      }
     
-     fetch("/fav",{
+     fetch("/fav/",{
        method: 'POST',
        credentials: 'same-origin',
        headers:{

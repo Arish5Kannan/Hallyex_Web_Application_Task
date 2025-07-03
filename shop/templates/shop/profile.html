@@ -9,21 +9,26 @@
     <div class="row justify-content-center">
         <div class="col-md-6 mb-3">
             <div class="profile-card  text-center p-4">
-                <img src="{% static "/images/user.png" %}" class="profile-img mb-3" alt="User Profile Picture">
-                <h4>{{ profile.user.username }}</h4>
+                <img src="{% if profile.profile_photo %}{{profile.profile_photo.url}}{% else %}{% static "/images/user.png" %}{% endif %}" class="profile-img mb-3" alt="User Profile Picture">
+                <h4>{% if profile.fullname %}{{ profile.fullname }}{% else %}Name not provided{% endif %}</h4>
                 
                 <hr>
                 <div class="text-start">
                     <p><strong>Email:</strong> {{profile.user.email}}</p>
-                    <p><strong>Phone:</strong>{% if profile.contact %} {{ profile.contact }} {% else %}+123 456 7890{% endif %}</p>
+                    <p><strong>Phone:</strong>{% if profile.contact %} {{ profile.contact }} {% else %}No contacts provided{% endif %}</p>
                     <p><strong>Status:</strong> {% if profile.user.is_active %} Active {% else %} Logged out {% endif %}</p>
                     <p><strong>Last Active:</strong>{{ profile.user.last_login }} </p>
                     <p><strong>Address:</strong>{% if profile.address %} {{ profile.address }} {% else %}9/56, main road, trichy{% endif %}</p>
                     <p><strong>Member Since:</strong>{{profile.user.date_joined}}</p>
                 </div>
-                <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-primary w-100  p-2 mt-3"><i class="fas fa-edit"></i>
+                <div class ="d-flex gap-2">
+                      <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-primary w-100  p-2 mt-3"><i class="fas fa-edit"></i>
                     Edit</a>
-                <a href="{% url 'logout' %}" class="btn btn-danger w-100 p-2 mt-2"><i class="fa fa-sign-out"></i> Logout</a>
+                <a href="{% url 'logout' %}" class="btn btn-danger w-100 p-2 mt-3 text-center"><i class="fa fa-sign-out"></i> Logout</a>
+            
+                </div>
+                <a href="{% url 'reset-password-profile' %}" class="btn btn-success w-100 p-2 mt-3 text-center"><i class="fa fa-refresh"></i> Reset Password</a>
+            
             </div>
         </div>
         <div class="col-md-6">
@@ -51,25 +56,82 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form>
-                <div class="mb-3">
-                  <label for="username" class="col-form-label">username:</label>
-                  <input type="text" class="form-control shadow-none border-none" id="username">
-                </div>
-                <div class="mb-3">
-                  <label for="email" class="col-form-label">Email:</label>
-                  <input class="form-control shadow-none border-none" id="email" type="email">
-                </div>
-                <div class="mb-3">
-                    <label for="contact" class="col-form-label">Contact:</label>
-                    <input class="form-control shadow-none border-none" id="contact" type="tel">
-                  </div>
-                  <div class="mb-3">
-                    <label for="message" class="col-form-label">Address:</label>
-                    <textarea class="form-control shadow-none border-none" id="message" type="text"></textarea>
-                  </div>
-              </form>
-        </div>
+<form>
+  <!-- Image upload with preview -->
+  <div class="mb-3 text-center">
+    <label for="profileImage" class="form-label">Profile Photo</label>
+    {% if profile.profile_photo %}
+    <div>
+      <img
+        id="previewImage"
+        src="{{ profile.profile_photo.url }}"
+        alt="Profile Photo"
+        class="rounded-circle"
+        style="width: 120px; height: 120px; object-fit: cover; border: 1px solid #ccc;"
+      />
+    </div>
+    {% else %}
+    <div>
+      <img
+        id="previewImage"
+        src="{% static "/images/user.png" %}"
+        alt="Profile Photo"
+        class="rounded-circle"
+        style="width: 120px; height: 120px; object-fit: cover; border: 1px solid #ccc;"
+      />
+    </div>
+    {% endif %}
+    <input
+      type="file"
+      class="form-control shadow-none border-none mt-2"
+      id="profileImage"
+      accept="image/*"
+    />
+  </div>
+
+  <!-- Full Name -->
+  <div class="mb-3">
+    <label for="username" class="col-form-label">Full Name:</label>
+    <input
+      type="text"
+      class="form-control shadow-none border-none"
+      value="{{ profile.fullname }}"
+      id="username"
+    />
+  </div>
+
+  <!-- Email -->
+  <div class="mb-3">
+    <label for="email" class="col-form-label">Email:</label>
+    <input
+      class="form-control shadow-none border-none"
+      id="email"
+      value="{{ profile.user.email }}"
+      type="email"
+    />
+  </div>
+
+  <!-- Contact -->
+  <div class="mb-3">
+    <label for="contact" class="col-form-label">Contact:</label>
+    <input
+      class="form-control shadow-none border-none"
+      value="{{ profile.contact }}"
+      id="contact"
+      type="tel"
+    />
+  </div>
+
+  <!-- Address -->
+  <div class="mb-3">
+    <label for="message" class="col-form-label">Address:</label>
+    <textarea
+      class="form-control shadow-none border-none"
+      id="message"
+      type="text"
+    >{{ profile.address }}</textarea>
+  </div>
+</form>        </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-danger rounded-0" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-success rounded-0" data-bs-dismiss="modal" id="editProfile">Save changes</button>
@@ -78,54 +140,58 @@
     </div>
   </section>
 
-{% include 'shop/inc/alert.html' %}
-{% include 'shop/inc/loader.html' %}
+
 
 <script>
-    document.addEventListener("DOMContentLoaded",function(event){
-        const btnEdit = document.getElementById("editProfile");
-        const loader = document.getElementById("loader");
-        btnEdit.addEventListener("click",function(event){
-            loader.style.display = "block";
-            const name = document.getElementById("username").value;
-            const email = document.getElementById("email").value;
-            const contact = document.getElementById("contact").value;
-            const address = document.getElementById("message").value;
-            console.log(name,email,contact,address)
-            if(!name || !email || !contact || !address )
-            {
-              showPopup("Oops! sorry", "Fill all the fields");
-                  return;
-            }
-            fetch("{% url 'edit_profile' profile.user.id %}", {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    'name':name,
-                    'mail':email,
-                    'contact':contact,
-                    'address':address
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
+document.addEventListener("DOMContentLoaded", function (event) {
+    const btnEdit = document.getElementById("editProfile");
+    const loader = document.getElementById("loader");
+
+    btnEdit.addEventListener("click", function (event) {
+        loader.style.display = "block";
+
+        const name = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
+        const contact = document.getElementById("contact").value;
+        const address = document.getElementById("message").value;
+
+       
+        const imageInput = document.getElementById("profileImage");
+        const imageFile = imageInput.files[0];
+
+       
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("mail", email);
+        formData.append("contact", contact);
+        formData.append("address", address);
+        if (imageFile) {
+            formData.append("profileImage", imageFile);
+        }
+
+        fetch("{% url 'edit_profile' profile.user.id %}", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": "{{ csrf_token }}",
+                
+            },
+            body: formData
+        })
+            .then((response) => response.json())
+            .then((data) => {
                 loader.style.display = "none";
-                showPopup(data['info'], data['status']);
+                showPopup(data["info"], data["status"]);
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error("Error:", error);
                 loader.style.display = "none";
                 showPopup("Oops! sorry", "Something went wrong. Please try again.");
             });
-
-        });
     });
+});
+
 
     // Function to show the popup
 function showPopup(greeting, message) {
@@ -171,5 +237,14 @@ function showPopup(greeting, message) {
         }
     };
   }
+</script>
+<!-- Image preview script -->
+<script>
+  document.getElementById('profileImage').addEventListener('change', function (e) {
+    const [file] = e.target.files;
+    if (file) {
+      document.getElementById('previewImage').src = URL.createObjectURL(file);
+    }
+  });
 </script>
 {% endblock content %}

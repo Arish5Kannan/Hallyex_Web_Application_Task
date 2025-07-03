@@ -150,15 +150,15 @@ ShopKart | Online shopping
 
          <!-- Contact Form Section -->
          <div class="col-lg-6 my-2" >
-             <form action="" method="POST"  class="bg-white p-4 shadow" style="border-radius: 10px;">
-                 {% csrf_token %}
+             <form method="POST" id="form"  class="bg-white p-4 shadow" style="border-radius: 10px;">
+                 <input type="hidden" name="access_key" value="1d83cdde-a619-45ca-9e8f-be778806b9a5">
                  <h4 class="mb-3 text-dark text-center">
                      <i class="fas fa-paper-plane"></i> Send Us a Message
                  </h4>
                  
                  <div class="mb-3">
                      <label for="username" class="form-label"><i class="fas fa-user"></i> Name</label>
-                     <input type="text" name="username" id="username" class="form-control custom-input" placeholder="Enter your name">
+                     <input type="text" name="name" id="username" class="form-control custom-input" placeholder="Enter your name">
                  </div>
 
                  <div class="mb-3">
@@ -225,7 +225,89 @@ ShopKart | Online shopping
 </section>
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const loader = document.getElementById('loader');
+    const form = document.getElementById('form');
+
+    function showLoader() {
+        loader.style.display = 'block';
+    }
+
+    function hideLoader() {
+        loader.style.display = 'none';
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        showLoader();
+
+        const formData = new FormData(form);
+        const jsonData = JSON.stringify(Object.fromEntries(formData));
+
+        fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: jsonData
+        })
+        .then(async (response) => {
+            hideLoader();
+            const responseJson = await response.json();
+            if (response.status === 200) {
+                showPopup("Congratulations","Message has been received successfully", true);
+            } else {
+                console.log(response);
+                showPopup("Oops! sorry", responseJson.message, false);
+            }
+        })
+        .catch(error => {
+            hideLoader();
+            console.error(error);
+            showPopup("Oops! sorry", "Something went wrong!", false);
+        })
+        .finally(() => {
+            form.reset();
+        });
+    });
+
+    function showPopup(greeting, message, isSuccess) {
+        const popup = document.getElementById('popup');
+        const greet = document.getElementById('greet');
+        const msg = document.getElementById('msg');
+        const closePopupBtn = document.getElementById('closePopup');
+        const img = document.getElementById('popImg');
+
+        greet.textContent = greeting;
+        msg.textContent = message;
+
+        if (isSuccess) {
+            img.src = "{% static 'images/tick.jpeg' %}";
+            closePopupBtn.style.backgroundColor = "#31d109";
+        } else {
+            img.src = "{% static 'images/wrong1.jpeg' %}";
+            closePopupBtn.style.backgroundColor = "red";
+        }
+
+        popup.style.display = "block";
+
+        closePopupBtn.onclick = function() {
+            popup.style.display = "none";
+            // no hint-based redirect needed
+        };
+
+        window.onclick = function(event) {
+            if (event.target === popup) {
+                popup.style.display = "none";
+            }
+        };
+    }
+});
+</script>
 
 
+   
  {% endblock content %}   
 

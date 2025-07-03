@@ -5,18 +5,21 @@ import datetime
 
 User._meta.get_field('email')._unique = True
 
+def getFilename(request,filename):
+    now = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    new_filename = '%s%s'%(now,filename)
+    return os.path.join('uploads/',new_filename)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile_photo = models.ImageField(upload_to=getFilename,blank=True,null=True)
+    fullname =models.CharField( max_length=50,blank=True,null=True)
     contact = models.CharField(max_length=15, blank=True, null=True)
     address = models.CharField(max_length=250, blank=True, null=True)
     def __str__(self):
         return self.user.username
 
-def getFilename(request,filename):
-    now = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-    new_filename = '%s%s'%(now,filename)
-    return os.path.join('uploads/',new_filename)
+
 class Category(models.Model):
     name = models.CharField(max_length=150,null=False,blank=False)  
     image = models.ImageField(upload_to=getFilename,null=True,blank=True) 
