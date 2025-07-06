@@ -34,13 +34,18 @@
                     </span>
                 </div>
                 
-                <h6 class="border text-dark shadow-sm bg-white p-3 d-inline-block rounded text-center " style="font-weight:900;">💰 Total: ₹{{ order.total_price }}</h6>
-                <p class="border text-muted shadow-sm bg-white p-3 d-inline-block rounded ">📅 Placed on: {{ order.created_at|date:"d M Y, H:i" }}</p>
+                <h6 class="border text-dark shadow-sm bg-white p-3 d-inline-block rounded text-center " style="font-weight:800;">Total: ₹{{ order.total_price }}</h6>
+                <p class="border h5 text-muted shadow-sm bg-white p-3 d-inline-block rounded text-center "><i class="fa-solid fa-calendar me-1" style="font-size:20px;"> </i>{{ order.created_at|date:"d M Y" }}</p>
                 <form method="post" class="d-inline">
                     {% csrf_token %}
+                    {% if order.order_status != 'Delivered' and order.order_status != 'Cancelled' %}
+                   
                     <button type="button" class="btn btn-danger px-4 p-2 cancel-order-btn" data-order-id="{{ order.id }}">
                         <i class="fa fa-trash"></i> Cancel
                     </button>
+                     
+                    {% endif %}
+                    
                 </form>
                 
 

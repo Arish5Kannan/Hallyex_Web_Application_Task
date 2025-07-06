@@ -10,15 +10,15 @@
         <div class="col-md-6 mb-3">
             <div class="profile-card  text-center p-4">
                 <img src="{% if profile.profile_photo %}{{profile.profile_photo.url}}{% else %}{% static "/images/user.png" %}{% endif %}" class="profile-img mb-3" alt="User Profile Picture">
-                <h4>{% if profile.fullname %}{{ profile.fullname }}{% else %}Name not provided{% endif %}</h4>
+                <h4>{% if profile.fullname %}{{ profile.fullname }}{% else %}Name not found{% endif %}</h4>
                 
                 <hr>
                 <div class="text-start">
-                    <p><strong>Email:</strong> {{profile.user.email}}</p>
+                    <p><strong>Email:</strong>{% if profile.user.email %}{{profile.user.email}} {% else %}No email added{% endif %} </p>
                     <p><strong>Phone:</strong>{% if profile.contact %} {{ profile.contact }} {% else %}No contacts provided{% endif %}</p>
                     <p><strong>Status:</strong> {% if profile.user.is_active %} Active {% else %} Logged out {% endif %}</p>
                     <p><strong>Last Active:</strong>{{ profile.user.last_login }} </p>
-                    <p><strong>Address:</strong>{% if profile.address %} {{ profile.address }} {% else %}9/56, main road, trichy{% endif %}</p>
+                    <p><strong>Address:</strong>{% if profile.address %} {{ profile.address }} {% else %}No address found.{% endif %}</p>
                     <p><strong>Member Since:</strong>{{profile.user.date_joined}}</p>
                 </div>
                 <div class ="d-flex gap-2">
@@ -52,7 +52,7 @@
     <div class="modal-dialog modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel"><i class="fa fa-edit"></i> Edit</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel"><i class="fa fa-edit"></i> Edit Profile</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -95,7 +95,7 @@
     <input
       type="text"
       class="form-control shadow-none border-none"
-      value="{{ profile.fullname }}"
+      value="{% if profile.fullname %}{{ profile.fullname }}{% else %}{% endif %}"
       id="username"
     />
   </div>
@@ -106,7 +106,7 @@
     <input
       class="form-control shadow-none border-none"
       id="email"
-      value="{{ profile.user.email }}"
+      value="{% if profile.user.email %}{{ profile.user.email }}{% else %}{% endif %}"
       type="email"
     />
   </div>
@@ -116,7 +116,7 @@
     <label for="contact" class="col-form-label">Contact:</label>
     <input
       class="form-control shadow-none border-none"
-      value="{{ profile.contact }}"
+      value="{% if profile.contact %}{{ profile.contact }}{% else %}{% endif %}"
       id="contact"
       type="tel"
     />
@@ -129,7 +129,7 @@
       class="form-control shadow-none border-none"
       id="message"
       type="text"
-    >{{ profile.address }}</textarea>
+    >{% if profile.address %}{{ profile.address }}{% else %}{% endif %}</textarea>
   </div>
 </form>        </div>
         <div class="modal-footer">

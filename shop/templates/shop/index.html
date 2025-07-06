@@ -238,7 +238,9 @@ document.addEventListener("DOMContentLoaded", function() {
         loader.style.display = 'none';
     }
 
-    form.addEventListener('submit', function(e) {
+
+
+        form.addEventListener('submit', function(e) {
         e.preventDefault();
         showLoader();
 
@@ -265,13 +267,18 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .catch(error => {
             hideLoader();
-            console.error(error);
-            showPopup("Oops! sorry", "Something went wrong!", false);
+            
+            
+            showPopup("Oops! sorry", "Lost internet connection,try again when online", false);
         })
         .finally(() => {
             form.reset();
         });
     });
+
+  
+
+
 
     function showPopup(greeting, message, isSuccess) {
         const popup = document.getElementById('popup');

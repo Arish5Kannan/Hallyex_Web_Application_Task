@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect,get_object_or_404,reverse
+from django.shortcuts import render,redirect,get_object_or_404
 from .models import *
 from shop.forms import CustomUserForm
 from django.contrib.auth import authenticate,login,logout
@@ -13,7 +13,7 @@ import razorpay
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.contrib import messages
-
+from razorpay.errors import BadRequestError, ServerError
 
 #Authorize razorpay with API Keys
 razorpay_client = razorpay.Client(auth=(
@@ -35,33 +35,48 @@ def cart(request):
     
     context = {
         'carts': cartitems,
-        'cart_count':cartitems.count(),
-        'Whishlist_count':favourites.count(),
-        'Orders_count':orders.count()
+        'cart_count': cartitems.count(),
+        'Whishlist_count': favourites.count(),
+        'Orders_count': orders.count()
     }
 
     if total_price > 0 and cartitems.exists():
         currency = 'INR'
         amount = convert_to_subunit(total_price)
-        razorpay_order = razorpay_client.order.create(
-            dict(
-                amount=amount,
-                currency=currency,
-                payment_capture='0'
+
+        try:
+            razorpay_order = razorpay_client.order.create(
+                dict(
+                    amount=amount,
+                    currency=currency,
+                    payment_capture='0'
+                )
             )
-        )
-        razorpay_order_id = razorpay_order['id']
-        callback_url = '/paymenthandler/'
+            razorpay_order_id = razorpay_order['id']
+            callback_url = '/paymenthandler/'
 
-        context.update({
-            'razorpay_order_id': razorpay_order_id,
-            'razorpay_amount': amount,
-            'razorpay_merchant_key': settings.RAZOR_KEY_ID,
-            'currency': currency,
-            'callback_url': callback_url
-        })
+            context.update({
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_amount': amount,
+                'razorpay_merchant_key': settings.RAZOR_KEY_ID,
+                'currency': currency,
+                'callback_url': callback_url
+            })
 
-    return render(request, 'shop/cart.html',context)
+        except (BadRequestError, ServerError) as e:
+            
+            messages.error(request, "There was an issue initiating the payment. Please try again later.")
+            print(f"Razorpay error: {e}")
+        except (razorpay.errors.GatewayError, razorpay.errors.SignatureVerificationError) as e:
+            
+            messages.error(request, "Payment service is currently unavailable. Please try again later.")
+            print(f"Razorpay generic error: {e}")
+        except Exception as e:
+            
+            messages.error(request, "Something went wrong. Please try again later.")
+            print(f"Unhandled error: {e}")
+
+    return render(request, 'shop/cart.html', context)
 
 @csrf_exempt
 def paymenthandler(request):
@@ -255,14 +270,14 @@ def add_to_cart(request):
             product_status = Product.objects.get(id=product_id)
             if product_status :
                 if Cart.objects.filter(user=request.user.id,product_id=product_id):
-                    return JsonResponse({'status':'Product is already in  cart'},status=200)
+                    return JsonResponse({'status':'Product has added already into the cart..'},status=200)
                 else:
                     if product_status.quantity >= product_qty:
                         Cart.objects.create(user=request.user,product_id=product_id,product_qty=product_qty)
-                        return JsonResponse({'status':'Product added to cart successfully..'},status=200) 
+                        return JsonResponse({'status':'Product has been added to cart successfully..'},status=200) 
                     else :
-                        return JsonResponse({'status':'Product out of stock..'},status=200)      
-            return JsonResponse({'status':'Product added to cart successfully..'},status=200)
+                        return JsonResponse({'status':'Currently product is in out of stock..'},status=200)      
+            return JsonResponse({'status':'Product has been added to cart successfully..'},status=200)
         else:
             return JsonResponse({'status':'Login to add Cart'},status=200)
     else :
@@ -276,7 +291,7 @@ def remove_cart(request):
      id = data['cartid']
      cartitem = Cart.objects.get(id=id)
      cartitem.delete()
-     return JsonResponse({'status':'Product removed successfully'},status=200)
+     return JsonResponse({'status':'Product has been removed successfully'},status=200)
    else :
      return JsonResponse({'status':'Login to remove'},status=200)  
 def orders(request):
@@ -301,10 +316,10 @@ def fav_page(request):
       product_status=Product.objects.get(id=product_id)
       if product_status:
          if Favourite.objects.filter(user=request.user.id,product_id=product_id):
-          return JsonResponse({'status':'Product Already in Favourite'}, status=200)
+          return JsonResponse({'status':'Product has added Already in whishlist..'}, status=200)
          else:
           Favourite.objects.create(user=request.user,product_id=product_id)
-          return JsonResponse({'status':'Product Added to Favourite successfully..'}, status=200)
+          return JsonResponse({'status':'Product has been added to whishlist successfully..'}, status=200)
     else:
       return JsonResponse({'status':'Login to Add Favourite'}, status=200)
    else:
@@ -410,14 +425,14 @@ def remove_fav(request):
     id = data["fid"]  
     favourite = Favourite.objects.get(id=id)
     favourite.delete()
-    return JsonResponse({'status':'Favourite product has been removed successfully'},status=200)
+    return JsonResponse({'status':'Whishlist product has been removed successfully..'},status=200)
 
 def delete_fav(request):
     if request.user.is_authenticated:
         favs = Favourite.objects.filter(user=request.user)  
         if favs.exists():  
             favs.delete()  
-            return JsonResponse({'status': 'Favourites have been removed successfully'}, status=200)
+            return JsonResponse({'status': 'Whishlist has been cleared successfully..'}, status=200)
         return JsonResponse({'status': 'No favourites found'}, status=404)
     return JsonResponse({'status': 'Unauthorized'}, status=401)
 
@@ -426,7 +441,7 @@ def delete_cart(request):
         cart = Cart.objects.filter(user=request.user)  
         if cart.exists():  
             cart.delete()  
-            return JsonResponse({'status': 'Cart have been removed successfully'}, status=200)
+            return JsonResponse({'status': 'Cart has been cleared successfully..'}, status=200)
         return JsonResponse({'status': 'No Cart items  found'}, status=404)
     return JsonResponse({'status': 'Unauthorized'}, status=401)
 

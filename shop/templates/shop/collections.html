@@ -9,9 +9,9 @@
 
 
 <!-- Hero Section -->
-<section class="hero bg-white text-white text-center py-5">
+<section class="hero  text-white text-center py-5" style="background-color:#fff;">
     <div class="container">
-        <h1 class="fw-bold text-dark">Explore Our Popular Categories</h1>
+        <h1 class="fw-bold text-dark mb-3">Explore Our Popular Categories</h1>
         <p class="lead text-muted " style="font-size:17px;" >Find the best products across various categories. Choose what suits you best!</p>
 
         <!-- Multiple Category Images -->
@@ -35,9 +35,9 @@
 
 {% if not request.user.is_authenticated %}
 <!-- Login/Register Prompt -->
-<section class="py-1 text-center container" style="margin-top:30px;">
+<section class="py-1 text-center container bg-light " style="margin-top:30px;border-radius:10px 10px 0 0;">
     <div class="row py-lg-5">
-        <div class="col-lg-6 col-md-8 mx-auto py-3 bg-light" style="border-radius:10px;">
+        <div class="col-lg-6 col-md-8 mx-auto py-3  shadow-sm" style="background-color:#fff;border-radius:10px;">
             <h1 class="fw-light">Bestsellers</h1>
             <p class="text-secondary ">Our most popular products based on sales. Updated hourly.</p>
             <p>

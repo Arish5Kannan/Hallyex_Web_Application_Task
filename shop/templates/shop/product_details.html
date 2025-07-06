@@ -114,7 +114,7 @@ ShopKart | {{prod}}
         }).then(response => {
 	        return response.json();
         }).then(data => {
-            if(data['status']==='Product added to cart successfully..')
+            if(data['status']==='Product has been added to cart successfully..')
             {
             showPopup('Congratulations!', data['status']);
             }
@@ -148,7 +148,7 @@ btnFav.addEventListener("click", function() {
          return response.json();
      }).then(data => {
         
-          if(data['status']==='Product Added to Favourite successfully..')
+          if(data['status']==='Product has been added to whishlist successfully..')
           {
             showPopup('Congratulations!', data['status']); 
           } 

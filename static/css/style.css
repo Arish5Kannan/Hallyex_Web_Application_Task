@@ -532,3 +532,23 @@ a{
   padding: 10px 20px;
   font-size: 18px;
 }
+#networkStatus {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      padding: 0.3rem;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      display: none;
+      z-index: 10000;
+      transition: all 0.7s linear;
+    }
+    .online {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .offline {
+      background-color: #f44336;
+      color: white;
+    }

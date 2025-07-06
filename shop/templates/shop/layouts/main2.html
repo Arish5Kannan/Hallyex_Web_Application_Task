@@ -135,7 +135,30 @@
    
 
    {% endblock content %}
-   
+   <div id="networkStatus"></div>
+       <script>
+    const networkStatus = document.getElementById('networkStatus');
+
+    function updateNetworkStatus() {
+      if (navigator.onLine) {
+        networkStatus.innerHTML = '<i class="fa-solid fa-wifi me-2"></i> Back online';
+        networkStatus.className = 'online';
+        networkStatus.style.display = 'block';
+        setTimeout(() => {
+          networkStatus.style.display = 'none';
+        }, 3000);
+      } else {
+        networkStatus.innerHTML = '<i class="fa-solid fa-wifi-slash me-2"> </i> offline';
+        networkStatus.className = 'offline';
+        networkStatus.style.display = 'block';
+      }
+    }
+
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
+
+    
+  </script>
     {% include 'shop/inc/footer.html' %}
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     

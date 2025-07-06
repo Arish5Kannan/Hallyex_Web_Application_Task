@@ -1,6 +1,6 @@
 {% extends 'shop/layouts/main2.html' %}
 {% block title %}
-ShopKart | Favourite
+ShopKart | Whishlist
 {% endblock title %}        
  {% block content %}
  {% load static %}
@@ -128,7 +128,7 @@ ShopKart | Favourite
                 body: JSON.stringify({})
             }).then(response => response.json())
             .then(data => {
-                showPopup("Favourites cleared!", data['status']);
+                showPopup("Congratulations!", data['status']);
                 document.querySelector("tbody").innerHTML = ""; // Clear table
             });
         });
