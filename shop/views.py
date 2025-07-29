@@ -14,6 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 from django.contrib import messages
 from razorpay.errors import BadRequestError, ServerError
+from django.core.paginator import Paginator
 
 #Authorize razorpay with API Keys
 razorpay_client = razorpay.Client(auth=(
@@ -219,26 +220,53 @@ def collection(request):
         'Orders_count':orders.count(),
             })
     return render(request,"shop/collections.html",context)
-def products(request,name):
-    context = {}
-    if(Category.objects.filter(status=0,name=name)):
-        prod = Product.objects.filter(category__name=name) 
-        context.update({"prod":prod,"category_name":name})
-                
-    
-    if request.user.is_authenticated :
-            cartitems = Cart.objects.filter(user=request.user)
-            favourites = Favourite.objects.filter(user=request.user)
-            orders = Orders.objects.filter(user=request.user)
-            context.update({
-                'cart_count':cartitems.count(),
-        'Whishlist_count':favourites.count(),
-        'Orders_count':orders.count(),
+
+def products(request, name):
+    if not Category.objects.filter(status=0, name=name).exists():
+        return JsonResponse({'error': 'Category not found'}, status=404)
+
+    products = Product.objects.filter(category__name=name)
+
+    # Search
+    search_query = request.GET.get('search')
+    if search_query:
+        products = products.filter(name__icontains=search_query)
+
+    # Sort
+    sort_by = request.GET.get('sort')
+    if sort_by in ['new_price', '-new_price', 'name', '-name', 'old_price', '-old_price']:
+        products = products.order_by(sort_by)
+
+    # Pagination
+    paginator = Paginator(products, 20)  # 8 products per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        # AJAX response
+        data = []
+        for product in page_obj:
+            data.append({
+                'id': product.id,
+                'name': product.name,
+                'old_price': product.old_price,
+                'new_price': product.new_price,
+                'discount': product.discount,
+                'image_url': product.product_image.url if product.product_image else '/static/images/tick.jpeg',
+                'details_url': f"/collections/{product.category.name}/{product.name}/"
             })
-    if request.user.is_authenticated or Category.objects.filter(status=0,name=name):
-        return render(request,"shop/products.html",context)
-    else:
-        return redirect('collections')
+        return JsonResponse({
+            'products': data,
+            'has_next': page_obj.has_next(),
+            'has_previous': page_obj.has_previous(),
+            'num_pages': paginator.num_pages,
+            'current_page': page_obj.number
+        })
+
+    return render(request, "shop/products.html", {
+        'category_name': name,
+        'prod': page_obj,
+    })
 def product_details(request,cname,pname):
     context = {}
     if request.user.is_authenticated:
