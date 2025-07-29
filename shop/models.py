@@ -10,6 +10,7 @@ def getFilename(request,filename):
     new_filename = '%s%s'%(now,filename)
     return os.path.join('uploads/',new_filename)
 
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_photo = models.ImageField(upload_to=getFilename,blank=True,null=True)

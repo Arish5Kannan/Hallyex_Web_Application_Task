@@ -202,7 +202,8 @@ def login_page(request):
                 
                 return JsonResponse({'status':'Invalid Username or Password'},status=200)
 
-    return render(request,'shop/login.html')     
+    return render(request,'shop/login.html')   
+  
 def collection(request):
     catagory = Category.objects.filter(status=0)
     category = Category.objects.filter(trending=1)
@@ -261,6 +262,7 @@ def product_details(request,cname,pname):
     else:
        
         return redirect('collections')
+
 def add_to_cart(request):
     if request.headers.get('x-requested-with')=='XMLHttpRequest':
         if request.user.is_authenticated:
@@ -294,6 +296,7 @@ def remove_cart(request):
      return JsonResponse({'status':'Product has been removed successfully'},status=200)
    else :
      return JsonResponse({'status':'Login to remove'},status=200)  
+
 def orders(request):
     context = {}
     cartitems = Cart.objects.filter(user=request.user)
@@ -308,6 +311,7 @@ def orders(request):
             })
     
     return render(request, "shop/orders.html", context)
+
 def fav_page(request):
    if request.headers.get('x-requested-with')=='XMLHttpRequest':
     if request.user.is_authenticated:
@@ -338,6 +342,7 @@ def profile(request):
         'Orders_count':orders.count()
         
         })
+
 def cancel_order(request, order_id):
     if request.method == "POST":
         order = get_object_or_404(Orders, id=order_id)
@@ -349,6 +354,7 @@ def cancel_order(request, order_id):
         return JsonResponse({"success": 'Congratulations!', "message": "Order has been cancelled successfully."})
     
     return JsonResponse({"success": False, "message": "Invalid request."}, status=400)
+
 def edit_profile(request, id):
     if request.method == 'POST':
         try:
