@@ -42,12 +42,12 @@ ShopKart | Login
                 style="padding: 20px; border-radius: 10px; background: #fff; max-width: 500px; margin: auto;">
             {% csrf_token %}
             <div class="text-center  position-relative ">
-              <img src="{% static "/images/auth-modified.png" %}" class=" img-thumbnail" 
+              <img src="{% static '/images/auth-modified.png' %}" class=" img-thumbnail" 
                  style="width:100px;height:100px;border-radius:50%; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);">
             </div>
             <div class="mb-3 mt-5">
-              <label for="username" class="form-label">User Name</label>
-              <input type="text" required name="username" id="username" class="form-control custom-input">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" required name="email" id="email" class="form-control custom-input">
             </div>
             <div class="mb-3">
               <label for="password" class="form-label">Password</label>
@@ -93,7 +93,7 @@ btnLogin.addEventListener("click",function(event){
 event.preventDefault();
 loader.style.display = "block";
 let postObject = {
-  'username' : username.value,
+  'email' : email.value,
   'password' : password.value
 };
 fetch("{% url 'login' %}", {
@@ -110,11 +110,11 @@ fetch("{% url 'login' %}", {
 .then(data => {
   console.log(data['status']);
   loader.style.display="none";
-  if(data['status'] == 'Login success'){
-    showPopup("Congratulations!","You have loggined successfully",'success');
-  }
-  else{
-    showPopup("Oops! sorry", data['status'],'failure');
+  if(data['status'] === 'Login success'){
+  showPopup("Congratulations!", "You have logged in successfully", 'success', data['redirect_url']);
+}
+else{
+    showPopup("Oops! sorry", data['status'],'failure',data['redirect_url']);
   }
   
 });
@@ -122,8 +122,7 @@ fetch("{% url 'login' %}", {
 });
 
 // Function to show the popup
-function showPopup(greeting, message, hint) {
-  console.log("showPopup() called:", greeting, message);
+function showPopup(greeting, message, hint, redirectUrl) {
   const popup = document.getElementById('popup');
   const greet = document.getElementById('greet');
   const msg = document.getElementById('msg');
@@ -141,36 +140,19 @@ function showPopup(greeting, message, hint) {
       closePopupBtn.style.backgroundColor = "#31d109";
   }
 
-    // Ensure the popup is displayed
-    popup.style.display = "block";
-  
-  
-  // Close button event
+  popup.style.display = "block";
+
   closePopupBtn.onclick = function() {
-      console.log("Popup closed!");
       popup.style.display = "none";
-      if(hint == 'success'){
-        window.location.href = "{% url 'home' %}";
-      }
-      else{
-        window.location.href = "{% url 'login' %}";
-      }
-      
+      window.location.href = redirectUrl || "{% url 'home' %}";
   };
 
-  // Close when clicking outside
   window.onclick = function(event) {
       if (event.target === popup) {
-          
           popup.style.display = "none";
-          if(hint == 'success'){
-            window.location.href = "{% url 'home' %}";
-          }
-          else{
-            window.location.href = "{% url 'login' %}";
-          }
+          window.location.href = redirectUrl || "{% url 'home' %}";
       }
-  }
+  };
 }
 
 </script>

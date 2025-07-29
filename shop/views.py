@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
 from django.http import *
 import json
+from shop.decorators import admin_required
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models.signals import post_save
@@ -27,57 +28,59 @@ def convert_to_subunit(amount, factor=100):
     subunit = int(round(amount * factor))
     return subunit
 
-@login_required(login_url="/login/")
+
 def cart(request):
-    cartitems = Cart.objects.filter(user=request.user)
-    favourites = Favourite.objects.filter(user=request.user)
-    orders = Orders.objects.filter(user=request.user)
-    total_price = sum(item.product.new_price * item.product_qty for item in cartitems)
-    
-    context = {
-        'carts': cartitems,
-        'cart_count': cartitems.count(),
-        'Whishlist_count': favourites.count(),
-        'Orders_count': orders.count()
-    }
+    if request.user.is_authenticated:
+        cartitems = Cart.objects.filter(user=request.user)
+        favourites = Favourite.objects.filter(user=request.user)
+        orders = Orders.objects.filter(user=request.user)
+        total_price = sum(item.product.new_price * item.product_qty for item in cartitems)
 
-    if total_price > 0 and cartitems.exists():
-        currency = 'INR'
-        amount = convert_to_subunit(total_price)
+        context = {
+            'carts': cartitems,
+            'cart_count': cartitems.count(),
+            'Whishlist_count': favourites.count(),
+            'Orders_count': orders.count()
+        }
 
-        try:
-            razorpay_order = razorpay_client.order.create(
-                dict(
-                    amount=amount,
-                    currency=currency,
-                    payment_capture='0'
+        if total_price > 0 and cartitems.exists():
+            currency = 'INR'
+            amount = convert_to_subunit(total_price)
+
+            try:
+                razorpay_order = razorpay_client.order.create(
+                    dict(
+                        amount=amount,
+                        currency=currency,
+                        payment_capture='0'
+                    )
                 )
-            )
-            razorpay_order_id = razorpay_order['id']
-            callback_url = '/paymenthandler/'
+                razorpay_order_id = razorpay_order['id']
+                callback_url = '/paymenthandler/'
 
-            context.update({
-                'razorpay_order_id': razorpay_order_id,
-                'razorpay_amount': amount,
-                'razorpay_merchant_key': settings.RAZOR_KEY_ID,
-                'currency': currency,
-                'callback_url': callback_url
-            })
+                context.update({
+                    'razorpay_order_id': razorpay_order_id,
+                    'razorpay_amount': amount,
+                    'razorpay_merchant_key': settings.RAZOR_KEY_ID,
+                    'currency': currency,
+                    'callback_url': callback_url
+                })
 
-        except (BadRequestError, ServerError) as e:
-            
-            messages.error(request, "There was an issue initiating the payment. Please try again later.")
-            print(f"Razorpay error: {e}")
-        except (razorpay.errors.GatewayError, razorpay.errors.SignatureVerificationError) as e:
-            
-            messages.error(request, "Payment service is currently unavailable. Please try again later.")
-            print(f"Razorpay generic error: {e}")
-        except Exception as e:
-            
-            messages.error(request, "Something went wrong. Please try again later.")
-            print(f"Unhandled error: {e}")
+            except (BadRequestError, ServerError) as e:
 
-    return render(request, 'shop/cart.html', context)
+                messages.error(request, "There was an issue initiating the payment. Please try again later.")
+                print(f"Razorpay error: {e}")
+            except (razorpay.errors.GatewayError, razorpay.errors.SignatureVerificationError) as e:
+
+                messages.error(request, "Payment service is currently unavailable. Please try again later.")
+                print(f"Razorpay generic error: {e}")
+            except Exception as e:
+
+                messages.error(request, "Something went wrong. Please try again later.")
+                print(f"Unhandled error: {e}")
+
+        return render(request, 'shop/cart.html', context)
+    return render(request,"shop/cart.html")
 
 @csrf_exempt
 def paymenthandler(request):
@@ -141,15 +144,19 @@ def paymenthandler(request):
         return HttpResponseBadRequest()
     
 
-@receiver(post_save, sender=User)
+@receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
-@receiver(post_save, sender=User)
+
+
+@receiver(post_save, sender=CustomUser)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 def home(request):
+    if request.user.is_authenticated and request.user.role=='admin':
+        return redirect('admin_dashboard')
     prod = Product.objects.filter(trending=1)
     cate = Category.objects.all()
     prods = Product.objects.exclude(discount=0) 
@@ -169,42 +176,51 @@ def home(request):
             })
       
     return render(request , "shop/index.html", context)
+
 def register(request):
-    if request.method == "POST" and request.headers.get("X-Requested-With") == "XMLHttpRequest":
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
         form = CustomUserForm(request.POST)
         if form.is_valid():
-            form.save()
-            return JsonResponse({"status": "success", "message": "You have successfully registered"}, status=200)
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data["password"])
+            user.save()
+            return JsonResponse({"status": "success", "message": "Registered successfully"}, status=200)
         else:
             errors = {field: error.get_json_data()[0]['message'] for field, error in form.errors.items()}
-            return JsonResponse({"status": "failure", "message": "You have not successfully registered", "errors": errors}, status=400)
-
-    form = CustomUserForm()
+            return JsonResponse({"status": "failure", "errors": errors}, status=400)
+    else:
+        form = CustomUserForm()
     return render(request, "shop/register.html", {"form": form})
+
+
 def logout_page(request):
     if request.user.is_authenticated:
         logout(request)   
         return redirect('/')
-def login_page(request):   
-    if  request.headers.get('x-requested-with')=='XMLHttpRequest':
-            data = json.load(request)
-            name = data["username"]
-            pwd = data["password"]
-            print(name,pwd)
-            user = authenticate(request,username=name,password=pwd)
-            if not User.objects.filter(username = name):
-                return JsonResponse({'status':'You are not registered'},status=200)
-            elif user is not None:
-                
-                login(request,user)
-               
-                return JsonResponse({'status':'Login success'},status=200)
-            else:
-                
-                return JsonResponse({'status':'Invalid Username or Password'},status=200)
 
-    return render(request,'shop/login.html')   
-  
+def login_page(request):   
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        data = json.load(request)
+        email = data["email"]
+        pwd = data["password"]
+        user = authenticate(request, email=email, password=pwd)
+
+        if not CustomUser.objects.filter(email=email).exists():
+            return JsonResponse({'status': 'You are not registered'}, status=200)
+        elif user is not None:
+            login(request, user)
+            
+            # Role-based redirection URL
+            if user.role == 'admin':
+                return JsonResponse({'status': 'Login success', 'redirect_url': '/admin/dashboard/'}, status=200)
+            else:
+                return JsonResponse({'status': 'Login success', 'redirect_url': '/'}, status=200)
+        else:
+            return JsonResponse({'status': 'Invalid Email or Password'}, status=200)
+
+    return render(request, 'shop/login.html')  
+
+
 def collection(request):
     catagory = Category.objects.filter(status=0)
     category = Category.objects.filter(trending=1)
@@ -417,7 +433,7 @@ def reset_password_profile(request):
         if request.headers.get('x-requested-with')=='XMLHttpRequest' :
           data=json.load(request)
           password = data['password']
-          user1 = User.objects.get(username=request.user)
+          user1 = CustomUser.objects.get(email=request.user)
           user1.set_password(password)
           user1.save()
           return JsonResponse({'info':'Congratulations!','status':'Password has been updated successfully'},status=200)
@@ -432,26 +448,28 @@ def reset_password_id(request):
       data=json.load(request)
       id=data['id']
       password = data['password']
-      user = User.objects.get(id=id)
-      user1 = User.objects.get(username=user)
+      user = CustomUser.objects.get(id=id)
+      user1 = CustomUser.objects.get(email=user)
       user1.set_password(password)
       user1.save()
       return JsonResponse({'info':'Congratulations!','status':'Password has been updated successfully'},status=200)
     else:
-        return JsonResponse({'info':'Oops! sorry','status':'Invalid Access'}, status=400)
+      return JsonResponse({'info':'Oops! sorry','status':'Invalid Access'}, status=400)
 
 def forgot_password(request):
     return render(request,"shop/forgot_password.html")
 
-@login_required(login_url="/login/")
+
 def favview(request):
-    favourite = Favourite.objects.filter(user=request.user)
-    favourites = Favourite.objects.filter(user=request.user)
-    cartitems = Cart.objects.filter(user=request.user)
-    orders = Orders.objects.filter(user=request.user)
-    return render(request,'shop/favourite.html',{'fav':favourite,'cart_count':cartitems.count(),
+    if request.user.is_authenticated:
+        favourite = Favourite.objects.filter(user=request.user)
+        favourites = Favourite.objects.filter(user=request.user)
+        cartitems = Cart.objects.filter(user=request.user)
+        orders = Orders.objects.filter(user=request.user)
+        return render(request,'shop/favourite.html',{'fav':favourite,'cart_count':cartitems.count(),
         'Whishlist_count':favourites.count(),
         'Orders_count':orders.count()})
+    return render(request,"shop/favourite.html")
 
 def remove_fav(request):
    if request.user.is_authenticated:
@@ -484,11 +502,11 @@ def forgot_password_processing(request):
     if request.method == 'POST':
         data = json.load(request)
         email = data['email']
-        users = User.objects.filter(email=email).values_list('id', flat=True)
+        users = CustomUser.objects.filter(email=email).values_list('id', flat=True)
         users = list(users)
         if users:
             id = users[0]
-            user = User.objects.filter(email=email).first()
+            user = CustomUser.objects.filter(email=email).first()
         else:
             return JsonResponse({'status':'Email has not been registered so far.'},status=200)
         link = f"""
@@ -606,7 +624,27 @@ def forgot_password_processing(request):
     
 def google_login_redirect(request):
     return redirect("/accounts/google/login/?process=login")
-        
+
+
+@login_required(login_url="/login/")
+@admin_required
+def admin_dashboard(request):
+    total_products = Product.objects.count()
+    total_categorys = Category.objects.count()
+    total_customers = CustomUser.objects.filter(role='customer').count()
+    pending_orders = Orders.objects.filter(order_status='pending').count()
+    processing_orders = Orders.objects.filter(order_status='processing').count()
+    shipped_orders = Orders.objects.filter(order_status='shipped').count()
+
+    context = {
+        'total_products': total_products,
+        'total_customers': total_customers,
+        'pending_orders': pending_orders,
+        'processing_orders': processing_orders,
+        'shipped_orders': shipped_orders,
+        'total_categorys':total_categorys
+    }
+    return render(request, 'shop/admin/dashboard.html', context)
 
 
 

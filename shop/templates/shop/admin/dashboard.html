@@ -1,0 +1,78 @@
+{% extends "shop/layouts/main1.html" %}
+{% block title %}
+Admin Dashboard
+{% endblock title %}
+
+{% block content %}
+{% include "shop/inc/navbarAdmin.html" %}
+<div class="container-fluid py-5 bg-light">
+  <div class="container py-4">
+    <h2 class="mb-4 text-center"><i class="fas fa-gauge"></i> Dashboard</h2>
+
+    <!-- Summary Stats -->
+    <div class="row text-center mb-4">
+      <div class="col-md-4 mb-3">
+        <div class="card shadow border-left-success">
+          <div class="card-body">
+            <h5>Total Categories</h5>
+            <h3>{{ total_categorys }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card shadow border-left-primary">
+          <div class="card-body">
+            <h5>Total Products</h5>
+            <h3>{{ total_products }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card shadow border-left-success">
+          <div class="card-body">
+            <h5>Total Customers</h5>
+            <h3>{{ total_customers }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Status Cards -->
+    <div class="row mb-3">
+      <div class="col-md-4 mb-3">
+        <div class="card  shadow border-left-warning">
+          <div class="card-body text-center">
+            <h5 class="text-warning">
+              <i class="fas fa-hourglass-half me-2"></i>Pending Orders
+            </h5>
+            <h3>{{ pending_orders }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <div class="card shadow border-left-success">
+          <div class="card-body text-center">
+            <h5 class="text-success">
+              <i class="fas fa-truck me-2"></i>Shipped Orders
+            </h5>
+            <h3>{{ shipped_orders }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <div class="card shadow border-left-info">
+          <div class="card-body text-center">
+            <h5 class="text-info">
+              <i class="fas fa-sync-alt me-2"></i>Processing Orders
+            </h5>
+            <h3>{{ processing_orders }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include "shop/inc/footer.html" %}
+{% endblock content %}

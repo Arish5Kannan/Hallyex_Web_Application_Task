@@ -22,7 +22,7 @@ ShopKart | Register
     <section class="row justify-content-center align-items-center g-4">
 
       <!-- LEFT SIDE: shopping content -->
-      <div  style="overflow:hidden;"class="col-lg-6 col-md-6 text-white text-center d-flex flex-column justify-content-center align-items-center p-4">
+      <div style="overflow:hidden;" class="col-lg-6 col-md-6 text-white text-center d-flex flex-column justify-content-center align-items-center p-4">
         <div>
           <h2 class="fw-bold mb-3">Welcome to ShopKart</h2>
           <p class="lead mb-3">Join thousands of happy shoppers today!</p>
@@ -37,39 +37,47 @@ ShopKart | Register
       </div>
 
       <!-- RIGHT SIDE: register form -->
-      <div class="col-lg-5 col-md-6 col-sm-10 col-12 position-relative" >
-        <form id="registerForm"style="overflow:hidden;" class="shadow w-100 p-4 bg-white rounded" style="max-width: 500px; margin: auto; position:relative;">
+      <div class="col-lg-5 col-md-6 col-sm-10 col-12 position-relative">
+        <form id="registerForm" class="shadow w-100 p-4 bg-white rounded" style="max-width: 500px; margin: auto; position:relative;">
           {% csrf_token %}
           <div class="text-center position-absolute" style="top:-45px; left:50%; transform:translateX(-50%);">
-            <img src="{% static 'images/auth-modified.png' %}" class="img-thumbnail border-0 shadow" 
+            <img src="{% static 'images/auth-modified.png' %}" class="img-thumbnail border-0 shadow"
                  style="width:100px;height:100px;border-radius:50%;">
           </div>
 
-          <div class="mb-3 mt-1 pt-4">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" name="username" id="username" class="form-control mb-1 custom-input" required>
-            <span class="text-danger" id="usernameError"></span>
+          <div class="mb-2 mt-1 pt-4">
+            <label for="first_name" class="form-label">First Name</label>
+            <input type="text" name="first_name" id="first_name" class="form-control mb-1 custom-input" required>
+            <span class="text-danger" id="firstnameError"></span>
           </div>
 
-          <div class="mb-3">
+          <div class="mb-2">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input type="text" name="last_name" id="last_name" class="form-control mb-1 custom-input" required>
+            <span class="text-danger" id="lastnameError"></span>
+          </div>
+
+          <div class="mb-2">
             <label for="email" class="form-label">Email</label>
             <input type="email" name="email" id="email" class="form-control mb-1 custom-input" required>
             <span class="text-danger" id="emailError"></span>
           </div>
 
-          <div class="mb-3">
-            <label for="password1" class="form-label">Password</label>
-            <input type="password" name="password1" id="password1" class="form-control mb-1 custom-input" required>
-            <span class="text-danger" id="password1Error"></span>
+          <div class="mb-2">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" name="password" id="password" class="form-control mb-1 custom-input" required>
+            <span class="text-danger" id="passwordError"></span>
           </div>
 
-          <div class="mb-3">
-            <label for="password2" class="form-label">Confirm Password</label>
-            <input type="password" name="password2" id="password2" class="form-control mb-1 custom-input" required>
-            <span class="text-danger" id="password2Error"></span>
+          <div class="mb-2">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <input type="password" id="confirm_password" class="form-control mb-1 custom-input" required>
+            <span class="text-danger" id="confirmPasswordError"></span>
           </div>
 
-          <button type="submit" class="btn btn-dark w-100 mt-1" style="padding:10px;">
+          <input type="hidden" name="role" value="customer">
+
+          <button type="submit" class="btn btn-dark w-100 mt-2" style="padding:8px;">
             <i class="fa fa-user-plus"></i> Register
           </button>
           <p class="my-2 text-center">Already a user?
@@ -98,6 +106,17 @@ document.addEventListener("DOMContentLoaded", function() {
     event.preventDefault();
     let formData = new FormData(registerForm);
     let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let confirmPassword = document.getElementById("confirm_password").value;
+    let password = formData.get("password");
+
+    // Reset errors
+    showErrors({});
+
+    if (password !== confirmPassword) {
+      showErrors({ confirm_password: "Passwords do not match" });
+      return;
+    }
+
     loader.style.display = "block";
     fetch("{% url 'register' %}", {
       method: "POST",
@@ -112,18 +131,22 @@ document.addEventListener("DOMContentLoaded", function() {
       if (data.status === "success") {
         showPopup("Congratulations!", data.message, "success");
       } else {
-        loader.style.display="none";
-        showErrors(data.errors);
+        loader.style.display = "none";
+        showErrors(data.errors || {});
       }
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+      loader.style.display = "none";
+      console.error("Error:", error);
+    });
   });
 
   function showErrors(errors) {
-    document.getElementById("usernameError").innerText = errors.username || "";
+    document.getElementById("firstnameError").innerText = errors.first_name || "";
+    document.getElementById("lastnameError").innerText = errors.last_name || "";
     document.getElementById("emailError").innerText = errors.email || "";
-    document.getElementById("password1Error").innerText = errors.password1 || "";
-    document.getElementById("password2Error").innerText = errors.password2 || "";
+    document.getElementById("passwordError").innerText = errors.password || "";
+    document.getElementById("confirmPasswordError").innerText = errors.confirm_password || "";
   }
 
   function showPopup(greeting, message, hint) {
