@@ -1,0 +1,140 @@
+{% extends "shop/layouts/main1.html" %}
+{% block title %}
+Admin | Products
+{% endblock title %}
+
+{% block content %}
+{% include "shop/inc/navbarAdmin.html" %}
+
+<div class="container-fluid bg-light pt-3" style="margin-top: 65px;">
+  <div class="d-flex justify-content-end align-items-end mt-4">
+    <button class="btn btn-outline-primary fw-semibold d-flex align-items-center gap-2"
+            data-bs-toggle="modal" data-bs-target="#addProductModal">
+      <i class="fas fa-plus"></i>
+      Add Product
+    </button>
+  </div>
+</div>
+
+<div class="container-fluid bg-light pb-5">
+  <div class="container py-3 bg-light">
+    <h2 class="h4  d-inline-block text-dark fw-semibold">Welcome Admin | <span class="text-primary fw-semibold">Products</span></h2>
+    <hr style="border-color:#404141;">
+    <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                  
+                  <li class="breadcrumb-item active" aria-current="page">Products</li>
+                </ol>
+              </nav>
+              <div class="d-flex justify-content-end align-items-center mb-3">
+  <div class="d-flex  gap-2">
+    <input type="text" id="customSearch" class="form-control text-primary fw-semibold bg-light border-primary" placeholder="Search products..." style="width: 200px;">
+    <select id="sortDropdown" class="form-select bg-light text-primary fw-semibold border-primary" style="width: 160px;">
+      <option disabled selected>Sort by</option>
+      <option value="3">Name</option>         <!-- td index: starts at 0 -->
+      <option value="5">Quantity</option>
+      <option value="6">Old Price</option>
+      <option value="7">New Price</option>
+    </select>
+  </div>
+</div>
+
+    <div class="table-responsive">
+      <table id="productsTable" class="table table-borderless table-striped table-hover nowrap w-100">
+        <thead class="table-dark">
+          <tr>
+            <th>SNO</th>
+            <th>Category</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Vendor</th>
+            <th>Quantity</th>
+            <th>Old Price</th>
+            <th>New Price</th>
+            <th>Discount</th>
+            <th>Status</th>
+            <th>Trending</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+          <tr>
+            <td></td>
+            <td>{{ product.category.name }}</td>
+            <td><img src="{{ product.product_image.url }}" alt="Image" style="width: 50px; height: 50px;"></td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.vendor }}</td>
+            <td>{{ product.quantity }}</td>
+            <td>₹{{ product.old_price | stringformat:'d'}}</td>
+            <td>₹{{ product.new_price | stringformat:'d'}}</td>
+            <td>{{ product.discount | stringformat:'d' }}%</td>
+            <td>{{ product.status|yesno:"Hidden,Visible" }}</td>
+            <td>{{ product.trending|yesno:"Trending,No" }}</td>
+            <td>{{ product.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+              <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#editModal{{ product.id }}"><i class="fas fa-edit"></i></button>
+              <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% for product in products %}
+  {% include "shop/admin/product/modals/edit_product_modal.html" %}
+  {% include "shop/admin/product/modals/delete_product_modal.html" %}
+{% endfor %}
+
+{% include "shop/admin/product/modals/add_product_modal.html" %}
+{% include "shop/inc/footer.html" %}
+
+<script>
+  $(document).ready(function () {
+    const table = $('#productsTable').DataTable({
+      pageLength: 20,
+      lengthMenu: [10, 20, 50, 100],
+      responsive: true,
+      scrollX: true,
+      dom: '<"d-flex justify-content-between align-items-center mb-3"B>rt<"d-flex justify-content-between align-items-center mt-3"lip>',
+      buttons: [
+        { extend: 'csvHtml5', className: 'btn btn-sm btn-primary' },
+        { extend: 'excelHtml5', className: 'btn btn-sm btn-primary' },
+        { extend: 'pdfHtml5', className: 'btn btn-sm btn-primary' },
+        { extend: 'print', className: 'btn btn-sm btn-primary' }
+      ],
+      columnDefs: [
+        {
+          targets: 0,
+          searchable: false,
+          orderable: false
+        }
+      ],
+      order: [[1, 'asc']],
+      drawCallback: function (settings) {
+        const api = this.api();
+        api.column(0, { page: 'current' }).nodes().each(function (cell, i) {
+          cell.innerHTML = i + 1;
+        });
+      }
+    });
+
+    // 🔍 Custom Search Field
+    $('#customSearch').on('keyup', function () {
+      table.search(this.value).draw();
+    });
+
+    // 🔽 Custom Sort Dropdown
+    $('#sortDropdown').on('change', function () {
+      const colIndex = $(this).val();
+      table.order([parseInt(colIndex), 'asc']).draw();
+    });
+  });
+</script>
+
+{% endblock content %}

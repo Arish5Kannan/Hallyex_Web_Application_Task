@@ -1,0 +1,76 @@
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form action="{% url 'add_product' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6 mb-2">
+              <label>Name</label>
+              <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label>Vendor</label>
+              <input type="text" name="vendor" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label>Category</label>
+              <select name="category" class="form-control" required>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3 mb-2">
+              <label>Quantity</label>
+              <input type="number" name="quantity" class="form-control" required>
+            </div>
+            <div class="col-md-3 mb-2">
+              <label>Discount (%)</label>
+              <input type="number" step="0.1" name="discount" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label>Old Price</label>
+              <input type="number" step="0.01" name="old_price" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label>New Price</label>
+              <input type="number" step="0.01" name="new_price" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-2">
+              <label>Image</label>
+              <input type="file" name="product_image" class="form-control" accept="image/*" required>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label>Status</label>
+              <select name="status" class="form-control">
+                <option value="False">Show</option>
+                <option value="True">Hide</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-2">
+              <label>Trending</label>
+              <select name="trending" class="form-control">
+                <option value="False">No</option>
+                <option value="True">Trending</option>
+              </select>
+            </div>
+            <div class="col-md-12 mb-2">
+              <label>Description</label>
+              <textarea name="description" class="form-control" required></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

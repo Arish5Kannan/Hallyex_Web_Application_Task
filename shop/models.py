@@ -85,8 +85,10 @@ class Product(models.Model):
     trending = models.BooleanField(default=False,help_text='0-default,1-trending')
     discount = models.FloatField(default=0,null=False,blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.name    
+
 class Cart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)  
     product = models.ForeignKey(Product,on_delete=models.CASCADE)  
@@ -96,6 +98,7 @@ class Cart(models.Model):
     @property
     def total(self):
         return self.product_qty*self.product.new_price  
+
 class Favourite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)  
     product = models.ForeignKey(Product,on_delete=models.CASCADE)     
@@ -113,7 +116,7 @@ class Orders(models.Model):
     total_price = models.FloatField(default=0)
     created_at = models.DateTimeField(auto_now_add=True) 
     def __str__(self):
-        return f"order {self.id} - {self.user.username} - {self.order_status}"
+        return f"order {self.id} - {self.user.first_name}{self.user.last_name} - {self.order_status}"
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Orders, on_delete=models.CASCADE, related_name="items")

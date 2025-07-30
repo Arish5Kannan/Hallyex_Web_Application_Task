@@ -2,197 +2,229 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="/static/images/auth-modified.png" type="image/x-icon" style="width:50px;height:50px;">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="{% static '/css/style.css' %}">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-   
-    <title>
-      {% block title %}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-      {% endblock title %}
-  </title>
-  <style>
-    
-    /* Order Card */
-   
-       
-.order-card {
-    
-    border-radius: 12px;
-    padding: 20px;
-    background:white; 
-    transition: all 0.3s linear;
-}
-{% comment %} .order-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 6px 12px rgba(22, 22, 22, 0.22);
-} {% endcomment %}
+    <title>{% block title %}{% endblock title %}</title>
 
-/* Order Header */
-.order-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    padding-bottom: 10px;
-}
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'images/auth-modified.png' %}" type="image/x-icon" />
 
-/* Item Card */
-.item-card {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    margin-bottom: 8px;
-    border-radius: 10px;
-    background: #ffffff;
-    border: 1px solid #dee2e6;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease-in-out;
-}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-{% comment %} .item-card:hover {
-    transform: scale(1.02);
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
-} {% endcomment %}
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
-/* Product Image */
-.product-img {
-    width: 100px; /* Reduced size */
-    height: 100px;
-   
-   
-    
-}
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" />
 
-/* Product Details */
-.product-details {
-    margin-left: 15px;
-    color: #333;
-}
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
-.product-details h6 {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
+    <!-- DataTables JS (placed early for jQuery dependencies) -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
-.product-details p {
-    font-size: 13px;
-    color: #555;
-    margin: 0;
-}
-
-/* Status Badge */
-.badge {
-    font-size: 14px;
-    padding: 8px 12px;
-    border-radius: 5px;
-}
-
-/* Extra Styling */
-.text-muted {
-    font-size: 13px;
-}
-
-.text-success {
-    font-weight: bold;
-}
-
-    .navbar-nav .nav-link:hover {
-      
-     
-      color:white;
-      border-radius:3px;
-  }
-  .custom-input {
-    border: 2px solid #000;
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 14px;
-    color: #333;
-}
-
-/* Custom Input Focus Effect */
-.custom-input:focus {
-    border-color: #f78c1e;
-    box-shadow: 0px 0px 10px rgba(247, 120, 17, 0.5);
-}
- 
-        @keyframes slide{
-    from {
-        transform:translateX(0%);
-    }
-    to {
-        transform:translateX(-100%);
-    }
- }  
-.logos-slide{
-    
-    display: inline-block;
-    animation:5s slide infinite linear;
-}
-.logos:hover .logos-slide{
-    animation-play-state:paused;
-}
-.logos{
-    white-space:nowrap;
-    overflow:hidden;
-    padding:50px 0;
-    background:white;
- 
-}
- .logos-slide img{
-    height:100px;
-    margin:0 40px;
- } 
-  
-  </style>
-  </head>
-  <body>
-    {%  include 'shop/inc/navbar.html' %}
-   {% block content %}
- 
- 
-
-
- 
-   
-
-   {% endblock content %}
-   
-    <div id="networkStatus"></div>
-   {% include 'shop/inc/footer.html' %}
-{% include 'shop/inc/alert.html' %}
-   {% include "shop/inc/loader.html" %}
-   <script>
-    const networkStatus = document.getElementById('networkStatus');
-
-    function updateNetworkStatus() {
-      if (navigator.onLine) {
-        networkStatus.innerHTML = '<i class="fa-solid fa-wifi me-1"></i> Back online';
-        networkStatus.className = 'online';
-        networkStatus.style.display = 'block';
-        setTimeout(() => {
-          networkStatus.style.display = 'none';
-        }, 3000);
-      } else {
-        networkStatus.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i> offline';
-        networkStatus.className = 'offline';
-        networkStatus.style.display = 'block';
+    <!-- Custom Inline Styles -->
+    <style>
+      /* Table Customizations */
+      table.dataTable {
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+        outline: none !important;
       }
-    }
 
-    window.addEventListener('online', updateNetworkStatus);
-    window.addEventListener('offline', updateNetworkStatus);
+      table.dataTable th,
+      table.dataTable td {
+        border: none !important;
+        vertical-align: middle !important;
+      }
 
-    
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+      /* Search Input */
+      div.dataTables_wrapper .dataTables_filter input {
+        border-radius: 0.25rem;
+        border: 1px solid #0d6efd;
+        padding: 6px 10px;
+        background-color: #f8f9fa;
+        color: #000;
+      }
 
-  
+      /* Length Dropdown */
+      div.dataTables_wrapper .dataTables_length select {
+        border: 1px solid #0d6efd !important;
+        background-color: #f8f9fa !important;
+        color: #000 !important;
+        padding: 6px 10px !important;
+        border-radius: 0.25rem !important;
+      }
+
+      .dt-buttons .btn {
+        margin-right: 5px !important;
+        box-shadow: none !important;
+      }
+
+      div.dataTables_wrapper .dataTables_info {
+        margin-top: 10px !important;
+      }
+
+      .dt-buttons {
+        margin-bottom: 10px !important;
+      }
+
+      /* Custom Input Field */
+      .custom-input {
+        border: 2px solid #000;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 14px;
+        color: #333;
+      }
+
+      .custom-input:focus {
+        border-color: #f78c1e;
+        box-shadow: 0px 0px 10px rgba(247, 120, 17, 0.5);
+      }
+
+      /* Cards and Logos */
+      .order-card {
+        border-radius: 12px;
+        padding: 20px;
+        background: white;
+        transition: all 0.3s linear;
+      }
+
+      .order-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 6px 12px rgba(22, 22, 22, 0.22);
+      }
+
+      .item-card {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 10px;
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .product-img {
+        width: 100px;
+        height: 100px;
+      }
+
+      .product-details {
+        margin-left: 15px;
+        color: #333;
+      }
+
+      .product-details h6 {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .product-details p {
+        font-size: 13px;
+        color: #555;
+        margin: 0;
+      }
+
+      .badge {
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 5px;
+      }
+
+      .text-muted {
+        font-size: 13px;
+      }
+
+      .text-success {
+        font-weight: bold;
+      }
+
+      .navbar-nav .nav-link:hover {
+        color: white;
+        border-radius: 3px;
+      }
+
+      .logos {
+        white-space: nowrap;
+        overflow: hidden;
+        padding: 50px 0;
+        background: white;
+      }
+
+      .logos-slide {
+        display: inline-block;
+        animation: 5s slide infinite linear;
+      }
+
+      .logos:hover .logos-slide {
+        animation-play-state: paused;
+      }
+
+      .logos-slide img {
+        height: 100px;
+        margin: 0 40px;
+      }
+
+      @keyframes slide {
+        from {
+          transform: translateX(0%);
+        }
+        to {
+          transform: translateX(-100%);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    {% include 'shop/inc/navbar.html' %}
+
+    {% block content %}
+    {% endblock content %}
+
+    <div id="networkStatus"></div>
+
+    {% include 'shop/inc/footer.html' %}
+    {% include 'shop/inc/alert.html' %}
+    {% include 'shop/inc/loader.html' %}
+    {% include 'shop/inc/impersonate_customer_banner.html' %}
+    <!-- Bootstrap Bundle JS (after jQuery + DataTables) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Offline/Online Network Detection -->
+    <script>
+      const networkStatus = document.getElementById('networkStatus');
+      function updateNetworkStatus() {
+        if (navigator.onLine) {
+          networkStatus.innerHTML = '<i class="fa-solid fa-wifi me-1"></i> Back online';
+          networkStatus.className = 'online';
+          networkStatus.style.display = 'block';
+          setTimeout(() => {
+            networkStatus.style.display = 'none';
+          }, 3000);
+        } else {
+          networkStatus.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i> offline';
+          networkStatus.className = 'offline';
+          networkStatus.style.display = 'block';
+        }
+      }
+
+      window.addEventListener('online', updateNetworkStatus);
+      window.addEventListener('offline', updateNetworkStatus);
+    </script>
   </body>
 </html>

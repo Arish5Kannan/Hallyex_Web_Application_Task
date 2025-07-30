@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
 from django.http import *
 import json
+from django.core.files.storage import FileSystemStorage
 from shop.decorators import admin_required
 from django.core.mail import send_mail
 from django.conf import settings
@@ -212,7 +213,7 @@ def login_page(request):
             
             # Role-based redirection URL
             if user.role == 'admin':
-                return JsonResponse({'status': 'Login success', 'redirect_url': '/admin/dashboard/'}, status=200)
+                return JsonResponse({'status': 'Login success', 'redirect_url': '/adminDashboard/'}, status=200)
             else:
                 return JsonResponse({'status': 'Login success', 'redirect_url': '/'}, status=200)
         else:
@@ -647,6 +648,202 @@ def admin_dashboard(request):
     return render(request, 'shop/admin/dashboard.html', context)
 
 
+@admin_required
+@login_required(login_url='/login/')
+def admin_manage_products(request):
+    products = Product.objects.all()
+    categories = Category.objects.all()
+    return render(request, "shop/admin/manageProducts.html", {
+        "products": products,
+        "categories": categories
+    })
 
-   
+@admin_required
+@login_required(login_url='/login/')
+def add_product(request):
+    if request.method == 'POST':
+        name = request.POST['name']
+        vendor = request.POST['vendor']
+        quantity = request.POST['quantity']
+        old_price = request.POST['old_price']
+        new_price = request.POST['new_price']
+        discount = request.POST['discount']
+        status = request.POST.get('status') == 'True'
+        trending = request.POST.get('trending') == 'True'
+        description = request.POST['description']
+        category = Category.objects.get(id=request.POST['category'])
+        product_image = request.FILES.get('product_image')
 
+        Product.objects.create(
+            name=name,
+            vendor=vendor,
+            quantity=quantity,
+            old_price=old_price,
+            new_price=new_price,
+            discount=discount,
+            status=status,
+            trending=trending,
+            description=description,
+            category=category,
+            product_image=product_image
+        )
+        return redirect('admin_products')
+@admin_required
+@login_required(login_url='/login/')
+def edit_product(request, id):
+    product = get_object_or_404(Product, id=id)
+    if request.method == 'POST':
+        product.name = request.POST['name']
+        product.vendor = request.POST['vendor']
+        product.quantity = request.POST['quantity']
+        product.old_price = request.POST['old_price']
+        product.new_price = request.POST['new_price']
+        product.discount = request.POST['discount']
+        product.status = request.POST.get('status') == 'True'
+        product.trending = request.POST.get('trending') == 'True'
+        product.description = request.POST['description']
+        product.save()
+        return redirect('admin_products')
+
+@admin_required
+@login_required(login_url='/login/')
+def delete_product(request, id):
+    product = get_object_or_404(Product, id=id)
+    if request.method == 'POST':
+        product.delete()
+        return redirect('admin_products')
+
+
+
+@admin_required
+@login_required(login_url='/login/')
+def admin_manage_customers(request):
+    customers = CustomUser.objects.filter(role='customer')
+    return render(request, "shop/admin/manageCustomers.html", {'customers': customers})
+
+
+@admin_required
+def delete_customer(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    if request.method == "POST":      
+        messages.success(request,f"User {user.first_name}{user.last_name} deleted successfully")
+        user.delete()
+        return redirect('/adminDashboard/')
+    return HttpResponseForbidden()
+
+
+@admin_required
+def reset_customer_password(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    temp_password = CustomUser.objects.make_random_password()
+    user.set_password(temp_password)
+    user.save()
+
+    send_mail(
+        'Temporary Password',
+        f'Hello {user.first_name}, your temporary password is: {temp_password}',
+        settings.EMAIL_HOST_USER,
+        [user.email]
+    )
+
+    messages.success(request, f'Temporary password sent to {user.email}')
+    return redirect('admin_customers')
+
+@admin_required
+def toggle_customer_status(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id, role='customer')
+    user.is_active = not user.is_active
+    user.save()
+    block = 'Unblocked' if user.is_active else "Blocked"
+    messages.success(request, f'{user.first_name}{user.last_name} has been {block}')
+    return redirect('admin_customers')
+
+@admin_required
+def admin_add_or_update_user(request):
+    user_id = request.POST.get("user_id")
+    email = request.POST.get("email")
+    first_name = request.POST.get("first_name")
+    last_name = request.POST.get("last_name")
+    password = request.POST.get("password")
+
+    if user_id:
+        user = get_object_or_404(CustomUser, id=user_id)
+        user.email = email
+        user.first_name = first_name
+        user.last_name = last_name
+        if password:
+            user.set_password(password)
+        user.save()
+        messages.success(request, f"Customer {user.first_name}{user.last_name} updated.")
+    else:
+        CustomUser.objects.create_user(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            password=password,
+            role="customer"
+        )
+        messages.success(request, "New Customer added.")
+
+    return redirect("admin_customers")
+
+@admin_required
+@login_required(login_url='/login/')
+def admin_manage_orders(request):
+    return render(request,"shop/admin/manageOrders.html")
+
+@admin_required
+@login_required(login_url='/login/')
+def admin_manage_settings(request):
+    return render(request,"shop/admin/settings.html")
+
+@admin_required
+def impersonate_customer(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id, role='customer')
+    request.session['impersonate_id'] = user.id
+    messages.info(request, f"You are now impersonating {user.email}")
+    return redirect('/')
+
+def stop_impersonation(request):
+    if 'impersonate_id' in request.session:
+        del request.session['impersonate_id']
+        messages.info(request, "Impersonation ended.")
+    return redirect('/adminDashboard/')
+
+@admin_required
+def customer_profile(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    profile = getattr(user, 'profile', None)
+    return render(request, 'shop/partials/customer_profile.html', {'user': user, 'profile': profile})
+
+@admin_required
+def customer_orders(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    orders = Orders.objects.filter(user=user).prefetch_related('items', 'items__product')
+    return render(request, 'shop/partials/customer_orders.html', {'user': user, 'orders': orders})
+
+@admin_required
+def admin_update_profile(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    profile, _ = Profile.objects.get_or_create(user=user)
+    if request.method == 'POST':
+
+        user.first_name = request.POST.get('first_name', '')
+        user.last_name = request.POST.get('last_name', '')
+        user.save()
+
+        profile.fullname = request.POST.get('fullname', '')
+        profile.contact = request.POST.get('contact', '')
+        profile.address = request.POST.get('address', '')
+
+        # Handle file upload
+        if 'profile_photo' in request.FILES:
+            profile.profile_photo = request.FILES['profile_photo']
+
+        profile.save()
+        messages.success(request, "Profile updated successfully.")
+        return redirect('admin_customers') 
+
+    return redirect('admin_customers')
+
+        

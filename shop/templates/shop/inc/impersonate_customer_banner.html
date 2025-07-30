@@ -1,0 +1,79 @@
+{% if request.impersonating %}
+<style>
+  .impersonation-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #ffc107;
+    padding: 15px 20px;
+    border-radius: 10px;
+    z-index: 9999;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    color: #000;
+    font-weight: 500;
+    animation: blinkAnimation 1s ease-in-out 3;
+    transition: opacity 0.3s ease;
+  }
+
+  @keyframes blinkAnimation {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .impersonation-toggle {
+    position: fixed;
+    bottom: 25px;
+    left: 20px;
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 9998;
+    cursor: pointer;
+  }
+
+  .impersonation-widget.hide {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .impersonation-widget {
+      width: 90%;
+      right: 5%;
+      bottom: 10px;
+      font-size: 14px;
+      padding: 10px;
+    }
+  }
+</style>
+
+<div class="impersonation-widget" id="impersonationWidget">
+  <i class="fas fa-user-secret"></i> Impersonating: <strong>{{ request.user.email }}</strong>
+  <a href="{% url 'stop_impersonation' %}" class="btn btn-sm btn-danger ms-2">Stop</a>
+</div>
+
+<button class="impersonation-toggle" id="impersonationToggle" title="Show Impersonation Info" style="display: none;">
+  <i class="fas fa-user-secret"></i>
+</button>
+
+<script>
+  const widget = document.getElementById('impersonationWidget');
+  const toggleBtn = document.getElementById('impersonationToggle');
+
+  // Auto-hide widget after 6s
+  setTimeout(() => {
+    widget.classList.add('hide');
+    toggleBtn.style.display = 'block';
+  }, 6000);
+
+  toggleBtn.addEventListener('click', () => {
+    widget.classList.remove('hide');
+    toggleBtn.style.display = 'none';
+  });
+</script>
+{% endif %}

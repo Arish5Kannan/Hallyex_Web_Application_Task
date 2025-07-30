@@ -1,0 +1,68 @@
+<div id="profile-view-section">
+  <ul class="list-group mb-3">
+    <li class="list-group-item"><strong>First Name:</strong> {{ user.first_name|default:"N/A" }}</li>
+    <li class="list-group-item"><strong>Last Name:</strong> {{ user.last_name|default:"N/A" }}</li>
+    <li class="list-group-item"><strong>Full Name:</strong> {{ profile.fullname|default:"N/A" }}</li>
+    <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+    <li class="list-group-item"><strong>Contact:</strong> {{ profile.contact|default:"N/A" }}</li>
+    <li class="list-group-item"><strong>Address:</strong> {{ profile.address|default:"N/A" }}</li>
+    {% if profile.profile_photo %}
+    <li class="list-group-item">
+      <strong>Photo:</strong><br>
+      <img src="{{ profile.profile_photo.url }}" alt="Profile Photo" class="img-fluid rounded" style="max-width:150px;">
+    </li>
+    {% endif %}
+  </ul>
+</div>
+
+<!-- Edit Form (Initially Hidden) -->
+<form id="profile-edit-form" method="POST" action="{% url 'admin_update_profile' user.id %}" enctype="multipart/form-data" style="display: none;">
+  {% csrf_token %}
+  <input type="hidden" name="user_id" value="{{ user.id }}">
+
+  <div class="mb-3">
+    <label>First Name</label>
+    <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+  </div>
+  <div class="mb-3">
+    <label>Last Name</label>
+    <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+  </div>
+  <div class="mb-3">
+    <label>Full Name</label>
+    <input type="text" name="fullname" class="form-control" value="{{ profile.fullname | default:""}}">
+  </div>
+  <div class="mb-3">
+    <label>Contact</label>
+    <input type="text" name="contact" class="form-control" value="{{ profile.contact | default:""}}">
+  </div>
+  <div class="mb-3">
+    <label>Address</label>
+    <textarea name="address" class="form-control">{{ profile.address | default:"" }}</textarea>
+  </div>
+
+  <!--  Profile Photo Upload -->
+  <div class="mb-3">
+    <label>Profile Photo</label>
+    <input type="file" name="profile_photo" class="form-control" onchange="previewImage(event)">
+    {% if profile.profile_photo %}
+      <img id="photoPreview" src="{{ profile.profile_photo.url }}" class="img-fluid rounded mt-2" style="max-width:150px;">
+    {% else %}
+      <img id="photoPreview" class="img-fluid rounded mt-2" style="max-width:150px; display:none;">
+    {% endif %}
+  </div>
+
+  <div class="d-flex justify-content-start gap-3 mb-2">
+    <button type="submit" class="btn btn-success">Save</button>
+    <button type="button" class="btn btn-danger" onclick="toggleProfileEdit(false)">Cancel</button>
+  </div>
+</form>
+
+
+
+
+<!-- Toggle Button -->
+<div class="modal-footer">
+  <button class="btn btn-primary" onclick="toggleProfileEdit(true)">Edit Profile</button>
+  <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+</div>

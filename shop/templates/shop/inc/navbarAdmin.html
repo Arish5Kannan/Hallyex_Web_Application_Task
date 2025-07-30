@@ -16,23 +16,23 @@
     <div class="collapse navbar-collapse" id="adminNavbar">
       <div class="navbar-nav ms-auto">
 
-        <a class="nav-link" href="{% url 'collections' %}">
+        <a class="nav-link" href="{% url 'admin_dashboard' %}">
           <i class="fas fa-home me-1"></i> Dashboard
         </a>
 
-        <a class="nav-link" href="{% url 'collections' %}">
+        <a class="nav-link" href="{% url 'admin_products' %}">
           <i class="fas fa-box-open me-1"></i> Products
         </a>
 
-        <a class="nav-link" href="">
+        <a class="nav-link" href="{% url 'admin_customers' %}">
           <i class="fas fa-users me-1"></i> Customers
         </a>
 
-        <a class="nav-link" href="">
+        <a class="nav-link" href="{% url 'admin_orders' %}">
           <i class="fas fa-receipt me-1"></i> Orders
         </a>
 
-        <a class="nav-link" href="">
+        <a class="nav-link" href="{% url 'admin_settings' %}">
           <i class="fas fa-cogs me-1"></i> Settings
         </a>
 
