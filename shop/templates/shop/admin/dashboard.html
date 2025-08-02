@@ -4,75 +4,458 @@ Admin Dashboard
 {% endblock title %}
 
 {% block content %}
+<style>
+  /* Theme-adaptive Dashboard Styling */
+  .dashboard-bg {
+    background: var(--bs-body-bg);
+    min-height: 100vh;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  /* Light theme styling */
+  [data-bs-theme="light"] .dashboard-bg,
+  body:not([data-bs-theme]) .dashboard-bg {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+  }
+
+  /* Dark theme styling */
+  [data-bs-theme="dark"] .dashboard-bg {
+    background: linear-gradient(135deg, #212529 0%, #343a40 50%, #495057 100%);
+  }
+
+  .dashboard-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bs-body-bg);
+    opacity: 0.1;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+
+  .dashboard-container {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Enhanced Dashboard Cards - Theme Adaptive */
+  .dashboard-card {
+    border-radius: 20px;
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
+    box-shadow: 0 8px 32px rgba(var(--bs-emphasis-color-rgb), 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Light theme cards */
+  [data-bs-theme="light"] .dashboard-card,
+  body:not([data-bs-theme]) .dashboard-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Dark theme cards */
+  [data-bs-theme="dark"] .dashboard-card {
+    background: rgba(33, 37, 41, 0.9);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--card-color), var(--card-color-light));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .dashboard-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .dashboard-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(var(--bs-emphasis-color-rgb), 0.15);
+  }
+
+  /* Dark theme hover effect */
+  [data-bs-theme="dark"] .dashboard-card:hover {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .dashboard-card .card-body {
+    padding: 2.5rem 2rem;
+    position: relative;
+  }
+
+  /* Icon styling - Theme adaptive */
+  .dashboard-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 1.8rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .dashboard-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s;
+    opacity: 0;
+  }
+
+  .dashboard-card:hover .dashboard-icon::before {
+    animation: shimmer 1.5s ease-in-out;
+    opacity: 1;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  }
+
+  /* Card specific colors - Bootstrap compatible */
+  .card-success-modern {
+    --card-color: var(--bs-success);
+    --card-color-light: #d1e7dd;
+  }
+
+  .card-primary-modern {
+    --card-color: var(--bs-primary);
+    --card-color-light: #cfe2ff;
+  }
+
+  .card-info-modern {
+    --card-color: var(--bs-info);
+    --card-color-light: #b3d4fc;
+  }
+
+  .card-warning-modern {
+    --card-color: var(--bs-warning);
+    --card-color-light: #fff3cd;
+  }
+
+  .card-danger-modern {
+    --card-color: var(--bs-danger);
+    --card-color-light: #f8d7da;
+  }
+
+  .card-purple-modern {
+    --card-color: #6f42c1;
+    --card-color-light: #e2d9f3;
+  }
+
+  /* Dark theme color adjustments */
+  [data-bs-theme="dark"] .card-success-modern {
+    --card-color-light: #0f5132;
+  }
+
+  [data-bs-theme="dark"] .card-primary-modern {
+    --card-color-light: #052c65;
+  }
+
+  [data-bs-theme="dark"] .card-info-modern {
+    --card-color-light: #055160;
+  }
+
+  [data-bs-theme="dark"] .card-warning-modern {
+    --card-color-light: #664d03;
+  }
+
+  [data-bs-theme="dark"] .card-danger-modern {
+    --card-color-light: #58151c;
+  }
+
+  [data-bs-theme="dark"] .card-purple-modern {
+    --card-color-light: #432874;
+  }
+
+  /* Icon backgrounds - Theme adaptive */
+  .icon-success { 
+    background: linear-gradient(135deg, var(--bs-success), var(--card-color-light)); 
+    color: white; 
+  }
+  .icon-primary { 
+    background: linear-gradient(135deg, var(--bs-primary), var(--card-color-light)); 
+    color: white; 
+  }
+  .icon-info { 
+    background: linear-gradient(135deg, var(--bs-info), var(--card-color-light)); 
+    color: white; 
+  }
+  .icon-warning { 
+    background: linear-gradient(135deg, var(--bs-warning), var(--card-color-light)); 
+    color: white; 
+  }
+  .icon-danger { 
+    background: linear-gradient(135deg, var(--bs-danger), var(--card-color-light)); 
+    color: white; 
+  }
+  .icon-purple { 
+    background: linear-gradient(135deg, #6f42c1, var(--card-color-light)); 
+    color: white; 
+  }
+
+  /* Typography - Theme adaptive */
+  .dashboard-title {
+    color: var(--bs-emphasis-color);
+    font-weight: 800;
+    text-shadow: 2px 2px 4px rgba(var(--bs-emphasis-color-rgb), 0.3);
+    margin-bottom: 3rem;
+    transition: color 0.3s ease;
+  }
+
+  .card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--bs-secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: color 0.3s ease;
+  }
+
+  .card-number {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin: 0;
+    background: linear-gradient(135deg, var(--card-color), var(--card-color-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: all 0.3s ease;
+  }
+
+  /* Fallback for browsers that don't support background-clip */
+  .card-number-fallback {
+    color: var(--card-color);
+  }
+
+  /* Pulse animation for numbers */
+  @keyframes pulse-number {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .dashboard-card:hover .card-number {
+    animation: pulse-number 2s infinite;
+  }
+
+  /* Theme toggle animation */
+  * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .dashboard-card .card-body {
+      padding: 2rem 1.5rem;
+    }
+    
+    .dashboard-icon {
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+    }
+    
+    .card-number {
+      font-size: 2.2rem;
+    }
+
+    .dashboard-title {
+      font-size: 1.8rem;
+      margin-bottom: 2rem;
+    }
+  }
+
+  /* Loading animation */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dashboard-card {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+  .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+  .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+  .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+  .dashboard-card:nth-child(5) { animation-delay: 0.5s; }
+  .dashboard-card:nth-child(6) { animation-delay: 0.6s; }
+
+  /* Header icon styling - Theme adaptive */
+  .header-icon {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-info));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(2px 2px 4px rgba(var(--bs-emphasis-color-rgb), 0.3));
+    transition: all 0.3s ease;
+  }
+
+  /* Dark theme specific adjustments */
+  [data-bs-theme="dark"] .dashboard-title {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  [data-bs-theme="dark"] .header-icon {
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+  }
+
+  /* Light theme specific adjustments */
+  [data-bs-theme="light"] .dashboard-title,
+  body:not([data-bs-theme]) .dashboard-title {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Focus states for accessibility */
+  .dashboard-card:focus-within {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+  }
+
+  /* Print styles */
+  @media print {
+    .dashboard-bg {
+      background: white !important;
+    }
+    
+    .dashboard-card {
+      background: white !important;
+      box-shadow: none !important;
+      border: 1px solid #000 !important;
+    }
+    
+    .dashboard-title,
+    .card-title,
+    .card-number {
+      color: black !important;
+    }
+  }
+</style>
+
 {% include "shop/inc/navbarAdmin.html" %}
-<div class="container-fluid py-5 bg-light">
-  <div class="container py-4">
-    <h2 class="mb-4 text-center"><i class="fas fa-gauge"></i> Welcome Admin</h2>
 
-    <!-- Summary Stats -->
-    <div class="row text-center mb-4">
-      <div class="col-md-4 mb-3">
-        <div class="card shadow border-left-success">
-          <div class="card-body">
-            <h5>Total Categories</h5>
-            <h3>{{ total_categorys }}</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 mb-3">
-        <div class="card shadow border-left-primary">
-          <div class="card-body">
-            <h5>Total Products</h5>
-            <h3>{{ total_products }}</h3>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 mb-3">
-        <div class="card shadow border-left-success">
-          <div class="card-body">
-            <h5>Total Customers</h5>
-            <h3>{{ total_customers }}</h3>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="dashboard-bg">
+  <div class="dashboard-container container-fluid py-5">
+    <div class="container py-4">
+      <h1 class="text-center dashboard-title">
+        <i class="fas fa-tachometer-alt me-3 header-icon"></i>
+        Admin Dashboard
+      </h1>
 
-    <!-- Order Status Cards -->
-    <div class="row mb-3">
-      <div class="col-md-4 mb-3">
-        <div class="card  shadow border-left-warning">
-          <div class="card-body text-center">
-            <h5 class="text-warning">
-              <i class="fas fa-hourglass-half me-2"></i>Pending Orders
-            </h5>
-            <h3>{{ pending_orders }}</h3>
+      <!-- First Row - Main Statistics -->
+      <div class="row g-4 mb-5 justify-content-center">
+        <div class="col-xl-4 col-lg-6 col-md-6">
+          <div class="card dashboard-card card-success-modern">
+            <div class="card-body text-center">
+              <div class="dashboard-icon icon-success">
+                <i class="fas fa-layer-group"></i>
+              </div>
+              <h5 class="card-title">Total Categories</h5>
+              <h2 class="card-number">{{ total_categorys }}</h2>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div class="col-md-4 mb-3">
-        <div class="card shadow border-left-success">
-          <div class="card-body text-center">
-            <h5 class="text-success">
-              <i class="fas fa-truck me-2"></i>Shipped Orders
-            </h5>
-            <h3>{{ shipped_orders }}</h3>
+        
+        <div class="col-xl-4 col-lg-6 col-md-6">
+          <div class="card dashboard-card card-primary-modern">
+            <div class="card-body text-center">
+              <div class="dashboard-icon icon-primary">
+                <i class="fas fa-box-open"></i>
+              </div>
+              <h5 class="card-title">Total Products</h5>
+              <h2 class="card-number">{{ total_products }}</h2>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-xl-4 col-lg-6 col-md-6">
+          <div class="card dashboard-card card-info-modern">
+            <div class="card-body text-center">
+              <div class="dashboard-icon icon-info">
+                <i class="fas fa-users"></i>
+              </div>
+              <h5 class="card-title">Total Customers</h5>
+              <h2 class="card-number">{{ total_customers }}</h2>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="col-md-4 mb-3">
-        <div class="card shadow border-left-info">
-          <div class="card-body text-center">
-            <h5 class="text-info">
-              <i class="fas fa-sync-alt me-2"></i>Processing Orders
-            </h5>
-            <h3>{{ processing_orders }}</h3>
+      <!-- Second Row - Order Statistics -->
+      <div class="row g-4 justify-content-center">
+        <div class="col-xl-4 col-lg-6 col-md-6">
+          <div class="card dashboard-card card-warning-modern">
+            <div class="card-body text-center">
+              <div class="dashboard-icon icon-warning">
+                <i class="fas fa-clock"></i>
+              </div>
+              <h5 class="card-title">Pending Orders</h5>
+              <h2 class="card-number">{{ pending_orders }}</h2>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-xl-4 col-lg-6 col-md-6">
+          <div class="card dashboard-card card-success-modern">
+            <div class="card-body text-center">
+              <div class="dashboard-icon icon-success">
+                <i class="fas fa-shipping-fast"></i>
+              </div>
+              <h5 class="card-title">Shipped Orders</h5>
+              <h2 class="card-number">{{ shipped_orders }}</h2>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-xl-4 col-lg-6 col-md-6">
+          <div class="card dashboard-card card-purple-modern">
+            <div class="card-body text-center">
+              <div class="dashboard-icon icon-purple">
+                <i class="fas fa-cogs"></i>
+              </div>
+              <h5 class="card-title">Processing Orders</h5>
+              <h2 class="card-number">{{ processing_orders }}</h2>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-{% include "shop/inc/footer.html" %}
+
+{% include "shop/inc/footerAdmin.html" %}
 {% endblock content %}

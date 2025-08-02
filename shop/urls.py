@@ -2,11 +2,14 @@ from django.urls import path
 from . import views
 urlpatterns = [
     path('',views.home,name="home"),
+    
     path('adminDashboard/', views.admin_dashboard, name='admin_dashboard'),
+   
     path('manageProducts/', views.admin_manage_products, name='admin_products'),
     path('adminProduct/edit/<int:id>/', views.edit_product, name='edit_product'),
     path('adminProduct/add/', views.add_product, name='add_product'),
     path('adminProduct/delete/<int:id>/', views.delete_product, name='delete_product'),
+    
     path('manageCustomers/',views.admin_manage_customers,name='admin_customers'),
     path('adminCustomers/add-or-update/', views.admin_add_or_update_user, name='admin_add_or_update_user'),
     path('adminCustomers/delete/<int:user_id>/', views.delete_customer, name='delete_customer'),
@@ -17,11 +20,25 @@ urlpatterns = [
     path('adminCustomers/profile/<int:user_id>/', views.customer_profile, name='customer_profile'),
     path('adminCustomers/orders/<int:user_id>/', views.customer_orders, name='customer_orders'),
     path('adminCustomers/update-profile/<int:user_id>/', views.admin_update_profile, name='admin_update_profile'),
-    path('mamageOrders/',views.admin_manage_orders,name='admin_orders'),
+    
+    path("adminOrders/", views.manage_orders, name="admin_manage_orders"),
+    path("adminOrders/order-details/<int:order_id>/", views.order_details, name="order_details"),
+    path("adminOrderstatus/<int:order_id>/get/", views.get_order_status, name="get_order_status"),
+    path("adminOrderstatus/<int:order_id>/update/", views.update_order_status, name="update_order_status"),
+    path("adminOrders/delete-order/<int:order_id>/", views.delete_order, name="delete_order"),
+    path("adminOrders/report/grouped/", views.grouped_order_report, name="grouped_order_report"),  
+    path("adminOrders/<int:order_id>/edit-items/", views.edit_order_items, name="edit_order_items"),
+    path("adminOrders/<int:order_id>/edit-shipping/", views.edit_shipping_address, name="edit_shipping_address"),
+    path('adminOrders/<int:order_id>/get-shipping/', views.get_shipping_details, name='get_shipping_details'),
+    path('adminOrders/<int:order_id>/items-json/', views.get_order_items_json, name='order_items_json'),
+    
+    
     path('customerSettings/',views.admin_manage_settings,name='admin_settings'),
+    
     path("reset-password-profile/",views.reset_password_profile, name="reset-password-profile"),
     path('google-login-direct/',views.google_login_redirect,name="google-login-direct"),
     path('register/',views.register,name="register"),
+    path('store-address/', views.store_address_session, name='store_address_session'),
     path('collection/',views.collection,name="collections"),
     path('collections/<str:name>/',views.products,name="collections"),
     path('collections/<str:cname>/<str:pname>/',views.product_details,name="product_details"),

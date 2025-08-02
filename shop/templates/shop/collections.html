@@ -11,7 +11,7 @@
 <!-- Hero Section -->
 <section class="hero  text-white text-center py-5" style="background-color:#fff;">
     <div class="container">
-        <h1 class="fw-bold text-dark mb-3">Explore Our Popular Categories</h1>
+        <h1 class="fw-bold  mb-3" style="color: {{branding.primary_color | default:'black'}};">Explore Our Popular Categories</h1>
         <p class="lead text-muted " style="font-size:17px;" >Find the best products across various categories. Choose what suits you best!</p>
 
         <!-- Multiple Category Images -->
@@ -38,7 +38,7 @@
 <section class="py-1 text-center container bg-light " style="margin-top:30px;border-radius:10px 10px 0 0;">
     <div class="row py-lg-5">
         <div class="col-lg-6 col-md-8 mx-auto py-3  shadow-sm" style="background-color:#fff;border-radius:10px;">
-            <h1 class="fw-light">Bestsellers</h1>
+            <h1 class="fw-light" style="color:{{branding.primary_color | default:'black'}}">Bestsellers</h1>
             <p class="text-secondary ">Our most popular products based on sales. Updated hourly.</p>
             <p>
                 <a href="{% url 'login' %}" class="btn btn-dark my-3 mx-2">Already a User?</a>
@@ -56,7 +56,7 @@
     <div class="container">
         <div class="row">
             <div class="col-12 my-3">
-                <h4 class="text-white bg-dark px-3 py-2 d-inline-block" style="margin-top: 30px; border-radius:10px;">
+                <h4 class="text-white  px-3 py-2 d-inline-block" style="background-color:{{branding.primary_color | default:'black'}};margin-top: 30px; border-radius:10px;">
                     Categories <i class="fas fa-th-large"></i>
                 </h4>
                 <hr style="border-color:#404041;">
@@ -81,10 +81,10 @@
 
 {% comment %} Trending products display section {% endcomment %}
 <section class="bg-light">
- <div class="container pb-2" style="margin-top: 0px;">
+ <div class="container pb-5" style="margin-top: 0px;">
    <div class="row">
     <div class="col-12 ">
-      <h4 class="text-white bg-dark px-3 py-2 d-inline-block" style="margin-top: 30px;border-radius:10px;">Trending sales <i class="fas fa-cart-shopping"></i></h4>
+      <h4 class="text-white  px-3 py-2 d-inline-block" style="background-color:{{branding.primary_color | default:'black'}};margin-top: 30px;border-radius:10px;">Trending sales <i class="fas fa-cart-shopping"></i></h4>
       <hr style="border-color:#404141;"></div>
       {% for a in prods %}
       <div class="col-md-4 col-lg-3">

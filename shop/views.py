@@ -1,9 +1,15 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from .models import *
-from shop.forms import CustomUserForm
+import csv
+import io
+import pandas as pd
+from django.db.models import Count, Sum, F, Value
+from django.db.models.functions import Coalesce
+from shop.forms import *
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
 from django.http import *
+from django.contrib.auth import update_session_auth_hash
 import json
 from django.core.files.storage import FileSystemStorage
 from shop.decorators import admin_required
@@ -12,7 +18,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 import razorpay
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import *
 import os
 from django.contrib import messages
 from razorpay.errors import BadRequestError, ServerError
@@ -85,16 +91,11 @@ def cart(request):
 
 @csrf_exempt
 def paymenthandler(request):
-
-    # only accept POST request.
     if request.method == "POST":
-        print(request.POST)
         try:
             cart_items = Cart.objects.filter(user=request.user)
-            # Calculate total order price
             total_price = sum(item.product.new_price * item.product_qty for item in cart_items)
 
-            # get the required parameters from post request.
             payment_id = request.POST.get('razorpay_payment_id', '')
             razorpay_order_id = request.POST.get('razorpay_order_id', '')
             signature = request.POST.get('razorpay_signature', '')
@@ -104,17 +105,27 @@ def paymenthandler(request):
                 'razorpay_signature': signature
             }
 
-            # verify the payment signature.
-            result = razorpay_client.utility.verify_payment_signature(
-                params_dict)
+            result = razorpay_client.utility.verify_payment_signature(params_dict)
             if result is not None:
-                amount = convert_to_subunit(total_price)  # Rs. 200
+                amount = convert_to_subunit(total_price)
                 try:
-
-                    # capture the payemt
                     razorpay_client.payment.capture(payment_id, amount)
-                    order = Orders.objects.create(user=request.user, total_price=total_price)
-                    # Move Cart items to OrderItem
+
+                    # Get shipping address from session
+                    shipping = request.session.get('shipping_address', {})
+                    
+                    order = Orders.objects.create(
+                        user=request.user,
+                        total_price=total_price,
+                        address_line1=shipping.get('address_line1', ''),
+                        address_line2=shipping.get('address_line2', ''),
+                        city=shipping.get('city', ''),
+                        state=shipping.get('state', ''),
+                        zipcode=shipping.get('zipcode', ''),
+                        country=shipping.get('country', ''),
+                        phone=shipping.get('phone', '')
+                    )
+
                     for cart_item in cart_items:
                         OrderItem.objects.create(
                             order=order,
@@ -123,27 +134,31 @@ def paymenthandler(request):
                             price=cart_item.product.new_price
                         )
 
-                    # Clear Cart
                     cart_items.delete()
-
-                    # render success page on successful caputre of payment
                     return render(request, 'shop/paymentsuccess.html')
-                except:
 
-                    # if there is an error while capturing payment.
+                except Exception as e:
+                    print("Error:", e)
                     return render(request, 'shop/paymentfail.html')
             else:
-
-                # if signature verification fails.
                 return render(request, 'shop/paymentfail.html')
-        except:
-
-            # if we don't find the required parameters in POST data
+        except Exception as e:
+            print("Exception:", e)
             return HttpResponseBadRequest()
-    else:
-       # if other than POST request is made.
-        return HttpResponseBadRequest()
+    return HttpResponseBadRequest()
     
+
+@csrf_exempt
+def store_address_session(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            request.session['shipping_address'] = data
+            return JsonResponse({'success': True})
+        except:
+            return JsonResponse({'success': False}, status=400)
+    return JsonResponse({'error': 'Invalid method'}, status=405)
+
 
 @receiver(post_save, sender=CustomUser)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -174,6 +189,7 @@ def home(request):
                 'cart_count':cartitems.count(),
         'Whishlist_count':favourites.count(),
         'Orders_count':orders.count(),
+        
             })
       
     return render(request , "shop/index.html", context)
@@ -208,10 +224,11 @@ def login_page(request):
 
         if not CustomUser.objects.filter(email=email).exists():
             return JsonResponse({'status': 'You are not registered'}, status=200)
+        elif not CustomUser.objects.filter(is_active=True,email=email).exists():
+            return JsonResponse({'status':'You have been blocked,Contact us for more details'})
         elif user is not None:
             login(request, user)
             
-            # Role-based redirection URL
             if user.role == 'admin':
                 return JsonResponse({'status': 'Login success', 'redirect_url': '/adminDashboard/'}, status=200)
             else:
@@ -408,6 +425,8 @@ def edit_profile(request, id):
             Email = request.POST.get('mail')
             Contact = request.POST.get('contact')
             Address = request.POST.get('address')
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
             
             image = request.FILES.get('profileImage')
             try:
@@ -416,6 +435,8 @@ def edit_profile(request, id):
                 if image is not None:
                     profile.profile_photo = image
                 profile.user.email = Email
+                profile.user.first_name= first_name
+                profile.user.last_name = last_name
                 profile.contact = Contact
                 profile.address = Address
                 profile.user.save()
@@ -428,20 +449,44 @@ def edit_profile(request, id):
     else:
         return JsonResponse({'info': 'Oops! sorry', 'status': 'Invalid Access'}, status=400)
 
+
+
+
+
 @login_required(login_url="/login/")
 def reset_password_profile(request):
-    if request.method == 'POST' and request.headers.get('x-requested-with')=='XMLHttpRequest' :
-        if request.headers.get('x-requested-with')=='XMLHttpRequest' :
-          data=json.load(request)
-          password = data['password']
-          user1 = CustomUser.objects.get(email=request.user)
-          user1.set_password(password)
-          user1.save()
-          return JsonResponse({'info':'Congratulations!','status':'Password has been updated successfully'},status=200)
-        else:
-          return JsonResponse({'info':'Oops! sorry','status':'Invalid Access'}, status=400)
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        try:
+            data = json.loads(request.body)
+            current_password = data.get('current_password')
+            new_password = data.get('password')
+
+            user = request.user
+
+            if user.check_password(current_password):
+                user.set_password(new_password)
+                user.save()
+
+                update_session_auth_hash(request, user)
+
+                return JsonResponse({
+                    'info': 'Congratulations!',
+                    'status': 'Password has been updated successfully'
+                }, status=200)
+            else:
+                return JsonResponse({
+                    'info': 'Oops! sorry',
+                    'status': 'Current password is incorrect'
+                }, status=400)
+
+        except Exception as e:
+            return JsonResponse({
+                'info': 'Error occurred',
+                'status': str(e)
+            }, status=500)
 
     return render(request,"shop/reset_password1.html")
+
 def reset_password(request,id):
     return render(request,"shop/reset_password.html",{'id':id})
 def reset_password_id(request):
@@ -789,19 +834,32 @@ def admin_add_or_update_user(request):
 
 @admin_required
 @login_required(login_url='/login/')
-def admin_manage_orders(request):
-    return render(request,"shop/admin/manageOrders.html")
-
-@admin_required
-@login_required(login_url='/login/')
 def admin_manage_settings(request):
-    return render(request,"shop/admin/settings.html")
+    settings_instance = BrandingSettings.objects.first() or BrandingSettings()
+
+    if request.method == 'POST':
+        form = BrandingSettingsForm(request.POST, request.FILES, instance=settings_instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Branding settings updated successfully.")
+            return redirect('admin_settings')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = BrandingSettingsForm(instance=settings_instance)
+
+    font_choices = ["Roboto", "Arial", "Georgia", "Helvetica", "Times New Roman", "Courier New"]
+    
+    return render(request, "shop/admin/settings.html", {
+        "form": form,
+        "settings": settings_instance,
+        "font_choices": font_choices
+    })
 
 @admin_required
 def impersonate_customer(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id, role='customer')
     request.session['impersonate_id'] = user.id
-    messages.info(request, f"You are now impersonating {user.email}")
     return redirect('/')
 
 def stop_impersonation(request):
@@ -846,4 +904,232 @@ def admin_update_profile(request, user_id):
 
     return redirect('admin_customers')
 
-        
+@admin_required
+def manage_orders(request):
+    orders = Orders.objects.select_related('user').all()
+
+    # Filters
+    from_date = request.GET.get('from')
+    to_date = request.GET.get('to')
+    customer_email = request.GET.get('customer')
+    status = request.GET.get('status')
+
+    if from_date:
+        orders = orders.filter(created_at__date__gte=from_date)
+    if to_date:
+        orders = orders.filter(created_at__date__lte=to_date)
+    if customer_email:
+        orders = orders.filter(user__email__icontains=customer_email)
+    if status:
+        orders = orders.filter(order_status__iexact=status)
+
+    return render(request, "shop/admin/manageOrders.html", {'orders': orders})
+
+@admin_required
+def get_order_status(request, order_id):
+    order = get_object_or_404(Orders, id=order_id)
+    return JsonResponse({'status': order.order_status})
+
+
+@csrf_exempt
+@admin_required
+def update_order_status(request, order_id):
+    if request.method == 'POST' :
+        order = get_object_or_404(Orders, id=order_id)
+        data = json.loads(request.body)
+        new_status = data.get('status')
+
+        if new_status:
+            order.order_status = new_status
+            order.save()
+            return JsonResponse({'message': 'Order status updated.'}, status=200)
+        return JsonResponse({'message': 'Invalid status.'}, status=400)
+    return JsonResponse({'message': 'Invalid request.'}, status=400)
+
+@admin_required
+def order_details(request, order_id):
+    order = get_object_or_404(Orders, id=order_id)
+    items = OrderItem.objects.filter(order=order).select_related('product')
+
+    return render(request, "shop/partials/order_details_partial.html", {
+        'order': order,
+        'items': items
+    })
+
+@csrf_protect
+@admin_required
+def delete_order(request, order_id):
+    if request.method == 'POST':
+        order = get_object_or_404(Orders, id=order_id)
+        order.delete()
+        messages.success(request,'Order has been deleted.')
+        return redirect('admin_manage_orders')
+    
+
+
+
+@admin_required
+@login_required
+def grouped_order_report(request):
+    group_by = request.GET.get('group_by')
+    export_format = request.GET.get('export')  # 'csv' or 'excel'
+    report = []
+
+    if group_by == "customer":
+        report = Orders.objects.values(
+            'user__email',
+            'user__profile__fullname',
+            'user__profile__contact'
+        ).annotate(
+            total_orders=Count('id'),
+            total_amount=Sum('total_price'),
+            total_quantity=Sum('items__quantity')
+        )
+        headers = ['Full Name', 'Email', 'Contact', 'Total Orders', 'Total Quantity', 'Total Amount (₹)']
+        rows = [
+            [
+                r['user__profile__fullname'],
+                r['user__email'],
+                r['user__profile__contact'],
+                r['total_orders'],
+                r['total_quantity'],
+                r['total_amount'],
+            ]
+            for r in report
+        ]
+
+    elif group_by == "product":
+        report = OrderItem.objects.values(
+            'product__name',
+            'product__vendor'
+        ).annotate(
+            total_quantity=Sum('quantity'),
+            total_amount=Sum('price'),
+            total_orders=Count('order', distinct=True)
+        )
+        headers = ['Product Name', 'Vendor', 'Total Orders', 'Total Quantity', 'Total Amount (₹)']
+        rows = [
+            [
+                r['product__name'],
+                r['product__vendor'],
+                r['total_orders'],
+                r['total_quantity'],
+                r['total_amount'],
+            ]
+            for r in report
+        ]
+
+    # Export logic
+    if export_format == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename=report_{group_by}.csv'
+
+        writer = csv.writer(response)
+        writer.writerow(headers)
+        writer.writerows(rows)
+        return response
+
+    elif export_format == 'excel':
+        df = pd.DataFrame(rows, columns=headers)
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Report')
+        buffer.seek(0)
+
+        response = HttpResponse(buffer.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename=report_{group_by}.xlsx'
+        return response
+
+    return render(request, "shop/grouped_report.html", {'report': report, 'group_by': group_by})
+
+
+@csrf_exempt
+@admin_required
+def edit_order_items(request, order_id):
+    order = get_object_or_404(Orders, id=order_id)
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            items = data.get('items', [])
+
+            for item_data in items:
+                item_id = item_data['id']
+                quantity = int(item_data['quantity'])
+
+                order_item = OrderItem.objects.select_related('product').get(id=item_id, order=order)
+                product = order_item.product
+
+                if quantity < 1 or quantity > product.quantity:
+                    return JsonResponse({'error': f"Invalid quantity for {product.name}"}, status=400)
+
+                order_item.quantity = quantity
+                order_item.price = quantity * product.new_price
+                order_item.save()
+
+            # Optionally update total order price
+            total_price = sum(i.price for i in order.items.all())
+            order.total_price = total_price
+            order.save()
+
+            return JsonResponse({'message': 'Order items updated successfully'})
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def get_shipping_details(request, order_id):
+    try:
+        order = Orders.objects.get(id=order_id)
+        shipping_details = {
+            'address_line1': order.address_line1,
+            'address_line2': order.address_line2,
+            'city': order.city,
+            'state': order.state,
+            'zipcode': order.zipcode,
+            'country': order.country,
+            'phone': order.phone,
+        }
+        return JsonResponse(shipping_details)
+    except Orders.DoesNotExist:
+        return JsonResponse({'error': 'Order not found'}, status=404)
+
+
+@csrf_exempt
+@admin_required
+def edit_shipping_address(request, order_id):
+    order = get_object_or_404(Orders, id=order_id)
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+
+            order.address_line1 = data.get('address_line1', '')
+            order.address_line2 = data.get('address_line2', '')
+            order.city = data.get('city', '')
+            order.state = data.get('state', '')
+            order.zipcode = data.get('zipcode', '')
+            order.country = data.get('country', '')
+            order.phone = data.get('phone', '')
+            order.save()
+
+            return JsonResponse({'message': 'Shipping address updated successfully'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+def get_order_items_json(request, order_id):
+    items = OrderItem.objects.filter(order_id=order_id).select_related('product')
+    data = []
+
+    for item in items:
+        data.append({
+            'id': item.id,
+            'name': item.product.name,
+            'image':item.product.product_image.url,
+            'qty': item.quantity,
+            'max': item.product.quantity,
+        })
+
+    return JsonResponse({'items': data})

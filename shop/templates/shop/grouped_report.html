@@ -1,0 +1,58 @@
+{% extends 'shop/layouts/main1.html' %}
+{% block title %}ShopKart | Grouped Report{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Grouped Order Report - {{ group_by|title }}</h2>
+    <a href="{% url 'admin_manage_orders' %}" class="btn btn-outline-primary">Back to Orders</a>
+  </div>
+
+  {% if report %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            {% if group_by == 'customer' %}
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+            {% elif group_by == 'product' %}
+              <th>Product Name</th>
+              <th>Vendor</th>
+            {% endif %}
+            <th>Total Orders</th>
+            <th>Total Quantity</th>
+            <th>Total Amount (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in report %}
+            <tr>
+              {% if group_by == 'customer' %}
+                <td>{{ row.user__profile__fullname }}</td>
+                <td>{{ row.user__email }}</td>
+                <td>{{ row.user__profile__contact }}</td>
+              {% elif group_by == 'product' %}
+                <td>{{ row.product__name }}</td>
+                <td>{{ row.product__vendor }}</td>
+              {% endif %}
+              <td>{{ row.total_orders }}</td>
+              <td>{{ row.total_quantity }}</td>
+              <td><strong>₹{{ row.total_amount }}</strong></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mb-3">
+  <a href="?group_by={{ group_by }}&export=csv" class="btn btn-sm btn-success me-2">Download CSV</a>
+  <a href="?group_by={{ group_by }}&export=excel" class="btn btn-sm btn-primary">Download Excel</a>
+</div>
+
+  {% else %}
+    <div class="alert alert-warning">No records found for this group.</div>
+  {% endif %}
+</div>
+{% endblock content %}

@@ -52,7 +52,7 @@ Admin | Customers
     <th class="align-middle">Status</th>
     <th class="align-middle">Profile</th> 
     <th class="align-middle">Orders</th>  
-    <th class="align-middle">Actions</th>
+    <th class="align-middle text-center">Actions</th>
   </tr>
 </thead>
 
@@ -79,31 +79,31 @@ Admin | Customers
 <td>
   <button class="btn btn-sm btn-outline-secondary" title="View Orders"
     onclick="viewOrders('{{ customer.id }}')">
-    <i class="fas fa-box-open"></i>
+    <i class="fas fa-box-open "></i>
   </button>
 </td>
 
             <td>
   <button class="btn btn-sm btn-primary" 
     onclick="openEditModal('{{ customer.id }}', '{{ customer.email }}', '{{ customer.first_name }}', '{{ customer.last_name }}')">
-    <i class="fas fa-edit"></i>
+    <i class="fas fa-edit me-1"></i>Edit
   </button>
 
   <button class="btn btn-sm btn-danger" 
     onclick="confirmDelete({{ customer.id }})">
-    <i class="fas fa-trash-alt"></i>
+    <i class="fas fa-trash-alt me-1"></i>Delete
   </button>
 
   <a href="{% url 'admin_reset_password' customer.id %}" class="btn btn-sm btn-warning" title="Reset Password">
-    <i class="fas fa-key"></i>
+    <i class="fas fa-key me-1"></i>send Password
   </a>
 
   <a href="{% url 'toggle_customer_status' customer.id %}" class="btn btn-sm btn-secondary" title="Toggle Status">
-    <i class="fas fa-toggle-on"></i>
+    <i class="fas fa-toggle-on me-1"></i>status update
   </a>
 
   <a href="{% url 'impersonate_customer' customer.id %}" class="btn btn-sm btn-info" title="Impersonate">
-    <i class="fas fa-user-secret"></i>
+    <i class="fas fa-user-secret me-1"></i>impersonate
   </a>
 </td>
 
@@ -241,7 +241,7 @@ Admin | Customers
   </div>
 </div>
 
-{% include "shop/inc/footer.html" %}
+{% include "shop/inc/footerAdmin.html" %}
 
 <script>
   $(document).ready(function () {

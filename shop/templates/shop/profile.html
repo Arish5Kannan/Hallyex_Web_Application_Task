@@ -1,7 +1,7 @@
 {% extends 'shop/layouts/main.html' %}
 {% load static %}
 {% block title %} 
-{{request.user}} profile
+ShopKart - profile
 {% endblock title %}
 
 {% block content %}
@@ -14,20 +14,22 @@
                 
                 <hr>
                 <div class="text-start">
+                    <p><strong>First Name:</strong>{% if profile.user.first_name %}{{profile.user.first_name}}{% endif %} </p>
+                    <p><strong>Last Name:</strong>{% if profile.user.last_name %}{{profile.user.last_name}}{% endif %} </p>
                     <p><strong>Email:</strong>{% if profile.user.email %}{{profile.user.email}} {% else %}No email added{% endif %} </p>
                     <p><strong>Phone:</strong>{% if profile.contact %} {{ profile.contact }} {% else %}No contacts provided{% endif %}</p>
                     <p><strong>Status:</strong> {% if profile.user.is_active %} Active {% else %} Logged out {% endif %}</p>
                     <p><strong>Last Active:</strong>{{ profile.user.last_login }} </p>
                     <p><strong>Address:</strong>{% if profile.address %} {{ profile.address }} {% else %}No address found.{% endif %}</p>
-                    <p><strong>Member Since:</strong>{{profile.user.date_joined}}</p>
-                </div>
+                    
+                  </div>
                 <div class ="d-flex gap-2">
                       <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-primary w-100  p-2 mt-3"><i class="fas fa-edit"></i>
                     Edit</a>
                 <a href="{% url 'logout' %}" class="btn btn-danger w-100 p-2 mt-3 text-center"><i class="fa fa-sign-out"></i> Logout</a>
             
                 </div>
-                <a href="{% url 'reset-password-profile' %}" class="btn btn-success w-100 p-2 mt-3 text-center"><i class="fa fa-refresh"></i> Reset Password</a>
+                <a href="{% url 'reset-password-profile' %}" class="btn  w-100 p-2 mt-3 text-center" style="background-color:{{branding.primary_color | default:'black'}};color:white;"><i class="fa fa-refresh"></i> Reset Password</a>
             
             </div>
         </div>
@@ -86,6 +88,30 @@
       class="form-control shadow-none border-none mt-2"
       id="profileImage"
       accept="image/*"
+    />
+  </div>
+
+
+
+    <!-- First Name -->
+  <div class="mb-3">
+    <label for="first_name" class="col-form-label">First Name:</label>
+    <input
+      type="text"
+      class="form-control shadow-none border-none"
+      value="{% if profile.user.first_name %}{{ profile.user.first_name }}{% else %}{% endif %}"
+      id="first_name"
+    />
+  </div>
+
+          <!-- Last Name -->
+  <div class="mb-3">
+    <label for="last_name" class="col-form-label">Last Name:</label>
+    <input
+      type="text"
+      class="form-control shadow-none border-none"
+      value="{% if profile.user.last_name %}{{ profile.user.last_name }}{% else %}{% endif %}"
+      id="last_name"
     />
   </div>
 
@@ -154,7 +180,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         const email = document.getElementById("email").value;
         const contact = document.getElementById("contact").value;
         const address = document.getElementById("message").value;
-
+        const first_name = document.getElementById("first_name").value;
+        const last_name = document.getElementById("last_name").value;
        
         const imageInput = document.getElementById("profileImage");
         const imageFile = imageInput.files[0];
@@ -165,6 +192,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         formData.append("mail", email);
         formData.append("contact", contact);
         formData.append("address", address);
+        formData.append("first_name", first_name);
+        formData.append("last_name", last_name);
         if (imageFile) {
             formData.append("profileImage", imageFile);
         }

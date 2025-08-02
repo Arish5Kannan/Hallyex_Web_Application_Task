@@ -21,7 +21,7 @@ ShopKart | Register
   <div class="container">
     <section class="row justify-content-center align-items-center g-4">
 
-      <!-- LEFT SIDE: shopping content -->
+      <!-- LEFT SIDE -->
       <div style="overflow:hidden;" class="col-lg-6 col-md-6 text-white text-center d-flex flex-column justify-content-center align-items-center p-4">
         <div>
           <h2 class="fw-bold mb-3">Welcome to ShopKart</h2>
@@ -69,12 +69,6 @@ ShopKart | Register
             <span class="text-danger" id="passwordError"></span>
           </div>
 
-          <div class="mb-2">
-            <label for="confirm_password" class="form-label">Confirm Password</label>
-            <input type="password" id="confirm_password" class="form-control mb-1 custom-input" required>
-            <span class="text-danger" id="confirmPasswordError"></span>
-          </div>
-
           <input type="hidden" name="role" value="customer">
 
           <button type="submit" class="btn btn-dark w-100 mt-2" style="padding:8px;">
@@ -96,7 +90,7 @@ ShopKart | Register
 <!-- Loader -->
 {% include 'shop/inc/loader.html' %}
 
-<!-- JavaScript for AJAX Registration -->
+<!-- JavaScript for AJAX Registration (no confirm password logic) -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const registerForm = document.getElementById("registerForm");
@@ -106,16 +100,9 @@ document.addEventListener("DOMContentLoaded", function() {
     event.preventDefault();
     let formData = new FormData(registerForm);
     let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    let confirmPassword = document.getElementById("confirm_password").value;
-    let password = formData.get("password");
 
     // Reset errors
     showErrors({});
-
-    if (password !== confirmPassword) {
-      showErrors({ confirm_password: "Passwords do not match" });
-      return;
-    }
 
     loader.style.display = "block";
     fetch("{% url 'register' %}", {
@@ -146,7 +133,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("lastnameError").innerText = errors.last_name || "";
     document.getElementById("emailError").innerText = errors.email || "";
     document.getElementById("passwordError").innerText = errors.password || "";
-    document.getElementById("confirmPasswordError").innerText = errors.confirm_password || "";
   }
 
   function showPopup(greeting, message, hint) {
@@ -176,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function() {
         window.location.href = "{% url 'login' %}";
       }
     };
-    window.onclick = function(){
+    window.onclick = function() {
       popup.style.display = "none";
       if (hint === "success") {
         window.location.href = "{% url 'login' %}";

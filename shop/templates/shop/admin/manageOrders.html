@@ -1,11 +1,365 @@
 {% extends "shop/layouts/main1.html" %}
-{% block title %}
-Admin | Orders
-{% endblock title %}
-
+{% block title %}Admin | Orders{% endblock title %}
 {% block content %}
 {% include "shop/inc/navbarAdmin.html" %}
+<div class="container-fluid bg-light pt-3" style="margin-top: 65px;">
+  <div class="d-flex justify-content-end align-items-end mt-4">
+    <a href="{% url 'grouped_order_report' %}?group_by=customer" class="btn btn-outline-primary fw-semibold d-flex align-items-center gap-2">
+      <i class="fas fa-chart-bar me-1"></i> Export Report
+    </a>
+  </div>
+</div>
+<div class="container-fluid bg-light pt-3 pb-5">
+  <div class="container py-3 bg-light">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="h4 text-dark fw-semibold mb-0">Welcome Admin | <span class="text-primary fw-semibold">Orders</span></h2>
+    </div>
+    <hr style="border-color:#404141;">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Orders</li>
+      </ol>
+    </nav>
+    <div class="row mb-4">
+      <div class="col-md-3 mb-2"><input type="date" id="from" class="form-control" placeholder="From"></div>
+      <div class="col-md-3 mb-2"><input type="date" id="to" class="form-control" placeholder="To"></div>
+      <div class="col-md-3 mb-2"><input type="text" id="customerFilter" class="form-control" placeholder="Customer Email"></div>
+
+      <div class="col-md-3 mb-2">
+        <select id="statusFilter" class="form-control">
+          <option value="">-- Filter by Status --</option>
+          <option value="Pending">Pending</option>
+          <option value="Processing">Processing</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div class="col-md-3 mb-2">
+        <input type="hidden" id="productFilter" class="form-control" placeholder="Product Name">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table id="ordersTable" class="table table-striped table-hover nowrap w-100 align-middle">
+        <thead class="table-dark ">
+          <tr>
+            <th class="align-middle">SNO</th>
+            <th class="align-middle">Order ID</th>
+            <th class="align-middle">Customer</th>
+            <th class="align-middle">Order Date</th>
+            <th class="align-middle">Status</th>
+            <th class="align-middle">Update Status</th>
+            <th class="align-middle">Total Price</th>
+            <th class="d-none">Product_name</th>
+            <th class="align-middle">Order Details</th>
+            <th class="align-middle">Order Items</th>
+            <th class="align-middle">Shipping Info</th>
+            <th class="align-middle">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+          <tr>
+            <td class="align-middle"></td>
+            <td class="align-middle">ORD00{{ order.id }}</td>
+            <td class="align-middle">{{ order.user.email }}</td>
+            <td class="align-middle">{{ order.created_at|date:"Y-m-d" }}</td>
+            <td class="align-middle">
+              <p class="badge
+              {% if order.order_status == 'Pending' %}
+              bg-dark
+              {% elif order.order_status == 'Processing' %}
+              bg-primary
+              {% elif order.order_status == 'Shipped' %}
+              bg-info
+              {% elif order.order_status == 'Cancelled' %}
+              bg-danger
+              {% elif order.order_status == 'Delivered' %}
+              bg-success
+              {% endif %}
+              ">{{order.order_status }}</p></td>
+              <td class="align-middle"><a class="btn btn-sm btn-warning mb-1" onclick="updateStatus({{ order.id }})"><i class="fas fa-edit"></i></a>
+            </td>
+            <td class="align-middle">₹{{ order.total_price | stringformat:'d'}}</td>
+            <td class="d-none">
+              {% for item in order.orderitem_set.all %}
+                {{ item.product.name }}
+              {% endfor %}
+            </td>
+
+            <td><button class="btn btn-sm btn-info mb-1" onclick="viewOrderDetails({{ order.id }})"><i class="fas fa-eye me-1"></i></button></td>
+            
+            <td class="align-middle"><button class="btn btn-sm btn-success" onclick="openEditItemsModal({{ order.id }})"><i class="fas fa-pen"></i></button></td>
+            
+            <td class="align-middle"><button class="btn btn-sm btn-primary" onclick="openEditShippingModal({{ order.id }})">Update</button></td>
+            
+            <td class="align-middle">
+              
+              <button class="btn btn-sm btn-danger " onclick="confirmDeleteOrder({{ order.id }})"><i class="fas fa-trash me-1"></i>Delete</button>
+                <a href="{% url 'impersonate_customer' order.user.id %}" class="btn btn-sm btn-primary" title="Impersonate">
+              <i class="fas fa-user-secret me-1"></i>Impersonate
+            </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- EditItem maodal -->
+ <div class="modal fade" id="editOrderItemsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form id="editOrderItemsForm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Order Items</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="editItemsBody">
+         
+        </div>
+        <div class="modal-footer">
+          <input type="hidden" id="editItemsOrderId">
+          <button type="submit" class="btn btn-primary">Update Items</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% include "shop/inc/order_modals.html" %}
+{% include "shop/inc/footerAdmin.html" %}
+
+<script>
+  $(document).ready(function () {
+    const table = $('#ordersTable').DataTable({
+      dom: 'rtp',
+      order: [[1, 'desc']],
+      pageLength: 20,
+      columnDefs: [
+        { orderable: false, targets: 0 } // Disable sorting on SNO
+      ]
+    });
+
+    // Auto-generate SNO
+    table.on('order.dt search.dt draw.dt', function () {
+      table.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell, i) {
+        cell.innerHTML = i + 1;
+      });
+    }).draw();
+
+    // Custom filter integrations
+    $('#customerFilter').on('keyup change', function () {
+      table.column(2).search(this.value).draw();
+    });
+
+    $('#productFilter').on('keyup change', function () {
+      table.column(7).search(this.value).draw();
+    });
+
+    $('#statusFilter').on('keyup change', function () {
+      table.column(4).search(this.value).draw();
+    });
+
+    $('#from, #to').on('change', function () {
+      const fromDate = $('#from').val();
+      const toDate = $('#to').val();
+
+      table.draw();
+    });
+
+    // Custom date filter
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      const from = $('#from').val();
+      const to = $('#to').val();
+      const dateStr = data[3]; // Order Date column
+      if (!dateStr) return false;
+
+      const orderDate = new Date(dateStr);
+      if ((from && orderDate < new Date(from)) || (to && orderDate > new Date(to))) {
+        return false;
+      }
+      return true;
+    });
+  });
+
+  function viewOrderDetails(id) {
+    fetch(`/adminOrders/order-details/${id}/`)
+      .then(res => res.text())
+      .then(html => {
+        $('#orderDetailsModal .modal-body').html(html);
+        new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+      });
+  }
+
+  function updateStatus(id) {
+    document.getElementById("order-id").value = id;
+    fetch(`/adminOrderstatus/${id}/get/`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("status").value = data.status;
+        new bootstrap.Modal(document.getElementById('updateStatusModal')).show();
+      });
+  }
+
+  document.getElementById("statusUpdateForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const id = document.getElementById("order-id").value;
+    const status = document.getElementById("status").value;
+    fetch(`/adminOrderstatus/${id}/update/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie('csrftoken')
+      },
+      body: JSON.stringify({ status })
+    })
+      .then(res => res.json())
+      .then(data => {
+        toastr.success(data.message);
+        bootstrap.Modal.getInstance(document.getElementById('updateStatusModal')).hide();
+        setTimeout(() => location.reload(), 1000);
+      });
+  });
+
+  function confirmDeleteOrder(id) {
+    $('#deleteOrderForm').attr('action', `/adminOrders/delete-order/${id}/`);
+    new bootstrap.Modal(document.getElementById('deleteOrderModal')).show();
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+function openEditItemsModal(orderId) {
+  fetch(`/adminOrders/${orderId}/items-json/`)
+    .then(res => res.json())
+    .then(data => {
+      const items = data.items;
+      
+      const tableRows = items.map(item => `
+        <tr>
+          <td>${item.name}</td>
+          <td><img src="${item.image}" style="height:35px;width:35px;" class="thumbnail"></td>
+          <td>
+            <input type="number" min="1" max="${item.max}" value="${item.qty}"
+                   data-id="${item.id}" data-max="${item.max}" class="form-control item-qty">
+          </td>
+          <td>${item.max}</td>
+        </tr>
+      `).join('');
+
+      $('#editItemsBody').html(`
+        <table class="table">
+          <thead><tr><th>Product</th><th>Image</th><th>Quantity</th><th>Max Available</th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      `);
+
+      $('#editItemsOrderId').val(orderId);
+      new bootstrap.Modal(document.getElementById('editOrderItemsModal')).show();
+    });
+}
+
+  $('#editOrderItemsForm').on('submit', function (e) {
+    e.preventDefault();
+    const orderId = $('#editItemsOrderId').val();
+    const items = [];
+
+    $('.item-qty').each(function () {
+      const quantity = parseInt($(this).val());
+      const id = $(this).data('id');
+      const max = parseInt($(this).data('max'));
+      if (quantity > 0 && quantity <= max) {
+        items.push({ id, quantity });
+      }
+    });
+
+    fetch(`/adminOrders/${orderId}/edit-items/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ items })
+    })
+      .then(res => res.json())
+      .then(data => {
+        toastr.success(data.message);
+        bootstrap.Modal.getInstance(document.getElementById('editOrderItemsModal')).hide();
+        setTimeout(() => location.reload(), 800);
+      });
+  });
+
+  function openEditShippingModal(orderId) {
+    // Set the order ID in the hidden input field
+    $('#shippingOrderId').val(orderId);
+    
+    // Fetch the current shipping details
+    fetch(`/adminOrders/${orderId}/get-shipping/`) // You need to create this URL/view
+      .then(res => res.json())
+      .then(data => {
+        // Populate the form fields with the fetched data
+        $('#address_line1').val(data.address_line1);
+        $('#address_line2').val(data.address_line2);
+        $('#city').val(data.city);
+        $('#state').val(data.state);
+        $('#zipcode').val(data.zipcode);
+        $('#country').val(data.country);
+        $('#phone').val(data.phone);
+
+        // Show the modal
+        new bootstrap.Modal(document.getElementById('editShippingModal')).show();
+      })
+      .catch(error => console.error('Error fetching shipping details:', error));
+  }
 
 
-{% include "shop/inc/footer.html" %}
+  $('#editShippingForm').on('submit', function (e) {
+    e.preventDefault();
+    const orderId = $('#shippingOrderId').val();
+
+    const payload = {
+      address_line1: $('#address_line1').val(),
+      address_line2: $('#address_line2').val(),
+      city: $('#city').val(),
+      state: $('#state').val(),
+      zipcode: $('#zipcode').val(),
+      country: $('#country').val(),
+      phone: $('#phone').val()
+    };
+
+    fetch(`/adminOrders/${orderId}/edit-shipping/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(res => res.json())
+      .then(data => {
+        toastr.success(data.message);
+        bootstrap.Modal.getInstance(document.getElementById('editShippingModal')).hide();
+        setTimeout(() => location.reload(), 800);
+      });
+  });
+</script>
+
 {% endblock content %}

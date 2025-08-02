@@ -1,10 +1,16 @@
 {% load static %}
-<nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="z-index:1050 !important; background:#000;">
-  <div class="container-fluid">
+<nav class="navbar navbar-expand-lg {{ navbar_theme }} fixed-top"
+     style="background-color:{{ branding.primary_color|default:'#000000' }};">
+<div class="container-fluid">
       <!-- Logo -->
       <a class="navbar-brand brand-shop" href="{% url 'home' %}">
-          <img class="img-fluid " src="{% static "/images/shopLogo.png" %}" style="width:130px;height:35px;">
-      </a>
+  {% if branding.logo %}
+    <img class="img-fluid" src="{{ branding.logo.url }}" alt="ShopKart Logo" style="width:40px;height:36px;">
+  {% else %}
+    <img class="img-fluid" src="{% static 'images/shopLogo.png' %}" alt="Default Logo" style="width:130px;height:35px;">
+  {% endif %}
+</a>
+
 
       <!-- Toggler Button -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" 

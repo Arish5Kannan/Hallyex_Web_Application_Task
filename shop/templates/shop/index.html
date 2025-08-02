@@ -4,12 +4,48 @@ ShopKart | Online shopping
 {% endblock title %}        
  {% block content %}
  {% load static %}
+ <style>
+  .typewriter-text {
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 2px solid #333;
+    animation: blink 0.7s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { border-color: transparent; }
+    50% { border-color: #333; }
+  }
+</style>
+
  {% include 'shop/inc/slider.html' %}
+{% comment %} Dashboard Brandings {% endcomment %}
+<div class="container-fluid py-5 rounded-0  shadow-none" style="background-color:black;">
+  <div class="text-center">
+    <h2 class="display-6 fw-semibold"
+        style="color:{{ branding.primary_color | default:'white' }}; font-family: {{ branding.font_family }};">
+      Welcome to {{ branding.name|default:"ShopKart, Find your needs" }}
+    </h2>
+
+    <p class="fw-semibold mt-3 typewriter-text text-warning"
+       style="max-width: 600px; margin: auto; font-size:25px;"
+       id="typewriter"
+       data-text="{{ branding.dashboard_html|default:'Quality products, unbeatable prices, and fast delivery — everything you love, right at your fingertips.' }}">
+    </p>
+
+    <p class="fst-italic fw-bold mt-3  text-info">
+      “{{ branding.slogan|default:"Empowering Everyday Choices" }}”
+    </p>
+  </div>
+</div>
+
+
  {% comment %} Popular categories section {% endcomment %}
- <div class="container" style="margin-top:30px">
+ <div class="container" style="margin-top:20px">
 <div class="row">
 <div class="col-12">
-    <h4 class="text-white bg-dark px-3 py-2 d-inline-block" style="margin-top: 30px;border-radius:10px;">Popular Categories <i class="fas fa-box"></i></h4>
+    <h4 class="text-white  px-3 py-2 d-inline-block" style="background-color:{{ branding.primary_color|default:'#000000' }};margin-top: 30px;border-radius:10px;">Popular Categories <i class="fas fa-box"></i></h4>
     <hr style="border-color:#404141;"></div>
     {% for b in cate %}
       <div class="col-md-4 col-lg-3">
@@ -43,7 +79,7 @@ ShopKart | Online shopping
  <div class="container " style="margin-top: 10px;">
    <div class="row">
     <div class="col-12 ">
-      <h4 class="text-white bg-dark px-3 py-2 d-inline-block" style="margin-top: 30px;border-radius:10px;">Trending sales <i class="fas fa-cart-shopping"></i></h4>
+      <h4 class="text-white  px-3 py-2 d-inline-block" style="background-color:{{ branding.primary_color|default:'#000000' }};margin-top: 30px;border-radius:10px;">Trending sales <i class="fas fa-cart-shopping"></i></h4>
       <hr style="border-color:#404141;"></div>
       {% for a in prod %}
       <div class="col-md-4 col-lg-3">
@@ -73,7 +109,7 @@ ShopKart | Online shopping
  <section class="container" style="margin-top:10px" id="trendy">
 <div class="row">
     <div class="col-12">
-        <h4 class="text-white bg-dark px-3 py-2 d-inline-block" style="margin-top: 30px;border-radius:10px;">Latest Offers <i class="fas fa-cart-shopping"></i></h4>
+        <h4 class="text-white  px-3 py-2 d-inline-block" style="background-color:{{ branding.primary_color|default:'#000000' }};margin-top: 30px;border-radius:10px;">Latest Offers <i class="fas fa-cart-shopping"></i></h4>
         <hr style="border-color:#404141;">
     </div>
     {% for a in prods %}
@@ -106,7 +142,7 @@ ShopKart | Online shopping
     <div class="container-fluid">
         <div class="row">
             <div class="col-12 d-flex justify-content-center">
-                <h4 class="text-white bg-dark px-3 py-2 d-inline-block" style="margin-top: 30px;border-radius:10px;">Special partners <i class="fas fa-cart-shopping"></i></h4>  
+                <h4 class="text-white  px-3 py-2 d-inline-block" style="margin-top: 30px;border-radius:10px;background-color:{{ branding.primary_color|default:'#000000' }};">Special partners <i class="fas fa-cart-shopping"></i></h4>  
             </div>
           
         </div>
@@ -226,6 +262,24 @@ ShopKart | Online shopping
  </div>
 </section>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const el = document.getElementById("typewriter");
+    const text = el.getAttribute("data-text");
+    let i = 0;
+
+    function typeWriter() {
+      if (i < text.length) {
+        el.innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typeWriter, 40); // Adjust typing speed here
+      }
+    }
+
+    el.innerHTML = "";
+    typeWriter();
+  });
+</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {

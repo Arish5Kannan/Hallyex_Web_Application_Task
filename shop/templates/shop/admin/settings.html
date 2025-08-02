@@ -1,4 +1,5 @@
 {% extends "shop/layouts/main1.html" %}
+{% load static %}
 {% block title %}
 Admin | Settings
 {% endblock title %}
@@ -6,6 +7,101 @@ Admin | Settings
 {% block content %}
 {% include "shop/inc/navbarAdmin.html" %}
 
+<div class=" container-fluid bg-light">
+  <div class="container  py-5" style="margin-top:65px;">
+    <h2 class="h4  d-inline-block text-dark fw-semibold">Welcome Admin | <span class="text-primary fw-semibold">Customer Portal</span></h2>
+    <hr style="border-color:#404141;">
+    <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="{% url 'admin_settings' %}">Dashboard</a></li>
+                  
+                  <li class="breadcrumb-item active" aria-current="page">Settings</li>
+                </ol>
+              </nav>
+  <div class="card border shadow-sm">
+    <div class="card-header bg-light text-dark fw-semibold">
+      <h4 class="mb-0 fw-semibold"><i class="fas fa-edit bg-dark p-2 text-white rounded"></i> Portal Settings</h4>
+    </div>
+    <div class="card-body">
+      <form id="settings-form" enctype="multipart/form-data" method="POST">
+        {% csrf_token %}
+        <div class="row">
+        <!-- Logo Upload -->
+        <div class="mb-3 col-12">
+          <label for="logo-upload" class="form-label"><strong>Logo Upload</strong></label>
+          <input class="form-control" type="file" id="logo-upload" name="logo" accept="image/*">
+          <div class="mt-2 col-12 ">
+            {% if form.instance.logo %}
+              <img id="logo-preview" src="{{ form.instance.logo.url }}" class="mx-auto d-block" alt="Current Logo" style="max-height: 100px;">
+                <h1 class="text-center h5 mt-2">Customer Portal Logo Preview</h1>
+              {% else %}
+              <img id="logo-preview" src="" alt="Logo Preview" class="mx-auto d-block" style="max-height: 100px; display: none;">
+            {% endif %}
+          </div>
+        </div>
 
-{% include "shop/inc/footer.html" %}
+        <!-- Primary Color -->
+        <div class="mb-3 col-12">
+          <label for="primary-color" class="form-label"><strong>Primary Color</strong></label>
+          <input type="color" class="form-control form-control-color" id="primary-color" name="primary_color" value="{{ form.instance.primary_color|default:'#FF5733' }}">
+        </div>
+
+        <!-- Secondary Color -->
+        <div class="mb-3 col-12">
+          <label for="secondary-color" class="form-label"><strong>Secondary Color</strong></label>
+          <input type="color" class="form-control form-control-color" id="secondary-color" name="secondary_color" value="{{ form.instance.secondary_color|default:'#00AACC' }}">
+        </div>
+
+<!-- Font Family Selector -->
+<div class="mb-3 col-12">
+  <label for="font-family" class="form-label"><strong>Font Family</strong></label>
+  <select class="form-select" id="font-family" name="font_family">
+    {% for font in font_choices %}
+      <option value="{{ font }}" {% if settings.font_family == font %}selected{% endif %}>{{ font }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+
+        <!-- Custom HTML Block -->
+        <div class="mb-3 col-12">
+          <label for="dashboard-html" class="form-label"><strong>Custom HTML Block for Dashboard</strong></label>
+          <textarea class="form-control" id="dashboard-html" name="dashboard_html" rows="5">{{ form.instance.dashboard_html }}</textarea>
+        </div>
+
+        </div>
+
+        <!-- Save Button -->
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+
+{% include "shop/inc/footerAdmin.html" %}
+
+<!-- TinyMCE Editor -->
+<script src="https://cdn.tiny.cloud/1/bu7uv3jruflic1vxvren0w3he2qjlxixj45yrtdtl8r3f0tb/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
+<script>
+  // Logo preview update
+  document.getElementById("logo-upload").onchange = function (e) {
+    const preview = document.getElementById("logo-preview");
+    preview.src = URL.createObjectURL(e.target.files[0]);
+    preview.style.display = "block";
+  };
+
+  // TinyMCE init
+  tinymce.init({
+    selector: '#dashboard-html',
+    menubar: false,
+    plugins: 'link image code lists',
+    toolbar: 'undo redo | bold italic | bullist numlist | link image | code',
+    height: 200
+  });
+</script>
+
 {% endblock content %}

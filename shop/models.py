@@ -114,6 +114,13 @@ class Orders(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)  
     order_status = models.CharField(max_length=50,default="Pending",choices=STATUS_CHOICES)
     total_price = models.FloatField(default=0)
+    address_line1= models.TextField(max_length=models.Max,blank=True,null=True)
+    address_line2= models.TextField(max_length=models.Max,blank=True,null=True)
+    country = models.CharField(max_length=100,blank=True,null=True)
+    zipcode = models.CharField(max_length=10,blank=True,null=True)
+    city = models.CharField(max_length=10,blank=True,null=True)
+    state = models.CharField(max_length=100,blank=True,null=True)
+    phone = models.CharField(max_length=50,blank=True,null=True)
     created_at = models.DateTimeField(auto_now_add=True) 
     def __str__(self):
         return f"order {self.id} - {self.user.first_name}{self.user.last_name} - {self.order_status}"
@@ -122,7 +129,19 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Orders, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    price = models.FloatField()  # Price at the time of purchase
+    price = models.FloatField()  
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name} (Order {self.order.id})"       
+    
+class BrandingSettings(models.Model):
+    logo = models.ImageField(upload_to=getFilename, null=True, blank=True)
+    primary_color = models.CharField(max_length=7, default='#FF5733')
+    secondary_color = models.CharField(max_length=7, default='#00AACC')
+    font_family = models.CharField(max_length=100, default='Roboto')
+    dashboard_html = models.TextField(blank=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "Branding Settings"

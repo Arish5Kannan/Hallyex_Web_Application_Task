@@ -55,8 +55,8 @@ ShopKart | Cart
             </div>
             <div class="row my-3">
                 <div class="col-12 d-flex flex-column flex-md-row gap-3 justify-content-center">
-                    <button id="placeOrder" class="btn btn-success w-100 w-md-25 p-3 place-order">
-                        <i class="fa fa-cart-shopping"></i> Place Order
+                    <button data-bs-toggle="modal" data-bs-target="#checkoutModal" class="btn btn-success w-100 w-md-25 p-3 place-order">
+                        <i class="fa fa-cart-shopping"></i> Checkout
                     </button>  
                     <button class="btn btn-danger w-100 w-md-25 p-3 clear-cart" id="delCart">
                         <i class="fa fa-trash"></i> Delete Cart
@@ -72,7 +72,7 @@ ShopKart | Cart
   {% else %}
   <div class="container text-center my-5">
     <img src="data:image/png;base64,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" alt="Empty Cart" class="img-fluid" style="max-width: 250px;">
-    <h2 class="mt-4 text-dark">Your Cart is Empty!</h2>
+    <h2 class="mt-4" style="color: {{ branding.primary_color|default:'#000000' }};">Your Cart is Empty!</h2>
     <p class="text-muted" style="font-size: 18px;">
         Looks like you haven't added anything to your cart yet. <br>
         Browse our amazing products and start shopping now!
@@ -83,8 +83,311 @@ ShopKart | Cart
 </div>
 {% endif %}
 
+  <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="checkoutModalLabel">Checkout</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form>
+        <div class="modal-body">
+          <div class="row">
+            <!-- Shipping Address -->
+            <div class="col-md-12">
+              <h6>Shipping Address</h6>
+             <div class="row col-12">
+                 <div class="mb-3 col-6">
+                <label for="address1" class="form-label">Address Line 1</label>
+                <textarea name="address_line1" id="address1" class="form-control" required></textarea>
+              </div>
+              <div class="mb-3 col-6">
+                <label for="address2" class="form-label">Address Line 2</label>
+                <textarea name="address_line2" id="address2" class="form-control"></textarea>
+              </div>
+              <div class="mb-3 col-6">
+                <label for="city" class="form-label">City</label>
+                <input type="text" name="city" id="city" class="form-control" required>
+              </div>
+              <div class="mb-3 col-6">
+                <label for="state" class="form-label">State</label>
+                <input type="text" name="state" id="state" class="form-control" required>
+              </div>
+              <div class="mb-3 col-6">
+                <label for="zipcode" class="form-label">Zipcode</label>
+                <input type="text" name="zipcode" id="zipcode" class="form-control" required>
+              </div>
+              <div class="mb-3 col-6">
+                <label for="country" class="form-label">Country</label>
+                <input type="text" name="country" id="country" class="form-control" required>
+              </div>
+              <div class="mb-3 col-6">
+                <label for="phone" class="form-label">Phone</label>
+                <input type="text" name="phone" id="phone" class="form-control" required>
+              </div>
+             </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-md-12">
+              <h6>Order Summary</h6>
+             
+              <ul class="list-group mb-3">
+  {% for item in carts %}
+  <li class="list-group-item">
+    <div class="d-flex align-items-center justify-content-between">
+      
+      <!-- Left side: Image + Product Info -->
+      <div class="d-flex align-items-center gap-3">
+        <img src="{{ item.product.product_image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded" style="height: 75px; width: 75px; object-fit: cover;">
+        <div>
+          <h6 class="mb-0">{{ item.product.name }}</h6>
+          <small class="text-muted">Quantity: {{ item.product_qty }}</small>
+        </div>
+      </div>
+
+      <!-- Right side: Price -->
+      <div>
+        <span class="fw-semibold">₹{{ item.total|stringformat:"d" }}</span>
+      </div>
+
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+              <div class="text-end">
+                <strong id="totalAmount"></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success rounded-1" id="placeOrder">Place Order</button>
+            <button type="button" class="btn btn-danger" id="modalClose" data-bs-dismiss="modal">Cancel</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% include 'shop/inc/footer.html' %}
 {% include 'shop/inc/loader.html' %} 
 {% include 'shop/inc/alert.html' %}
 
-   
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        const CID = document.getElementById('cid');
+        const loader =  document.getElementById('loader');
+        const btnRemove = document.getElementById('btnremove');
+        const btnOrder = document.getElementById('placeOrder');  // Now correctly defined inside event listener
+        const btnDelete = document.getElementById("delCart");
+          
+  {% if messages %}
+    {% for message in messages %}
+        showPopup(
+          "{% if message.tags == 'error' %}Oops! sorry{% else %}Congratulations!{% endif %}",
+          "{{ message|escapejs }}",
+          
+        );
+    {% endfor %}
+{% endif %}
+
+    let amount = "{{ razorpay_amount }}"
+    var options = {
+      
+      // Enter the Key ID generated from the Dashboard
+      key: "{{ razorpay_merchant_key }}", 
+      
+      // Amount is in currency subunits.
+      // Default currency is INR. Hence, 
+      // 50000 refers to 50000 paise
+      amount: "{{ razorpay_amount }}", 
+      currency: "{{ currency }}",
+      
+      // Your/store name.
+      name: "ShopKart", 
+      
+      // Pass the `id` obtained in the response of Step 1
+      order_id: "{{ razorpay_order_id }}", 
+      callback_url: "{{ callback_url }}",
+    };
+if(amount !== null && parseInt(amount,10) > 0)
+{
+    var rzp1 = new Razorpay(options);
+}
+        
+        btnDelete.addEventListener("click",function(event){
+            loader.style.display = "block";           
+            fetch("{% url 'delete_cart' %}", {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                loader.style.display="none";
+                showPopup("Congratulations!", data['status'],'cart');
+            });
+        });
+    document.querySelectorAll('.btn-remove').forEach(button => {
+        button.addEventListener("click", function(event) {
+            loader.style.display = "block";
+            
+            let cartItemId = this.getAttribute('data-id');  // Fetch item ID from button
+            let postObject = {
+                'cartid': cartItemId,
+            }; 
+            fetch("/remove_cart/", {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify(postObject)
+            })
+            .then(response => response.json())
+            .then(data => {
+                loader.style.display="none";
+                showPopup("Congratulations!", data['status'],'cart');
+            });
+               
+    });
+
+        //  Event listener for placing an order
+btnOrder.addEventListener("click", function(event) {
+    event.preventDefault();
+    loader.style.display = "block";
+
+    // Gather form data
+    const addressData = {
+        address_line1: document.getElementById("address1").value.trim(),
+        address_line2: document.getElementById("address2").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        state: document.getElementById("state").value.trim(),
+        zipcode: document.getElementById("zipcode").value.trim(),
+        country: document.getElementById("country").value.trim(),
+        phone: document.getElementById("phone").value.trim()
+    };
+
+    // Simple validation
+    for (const key in addressData) {
+        if (key !== 'address_line2' && addressData[key] === "") {
+            loader.style.display = "none";
+            showPopup("Oops! sorry", `Please fill in ${key.replace(/_/g, " ")}`, "cart");
+            return null;
+        }
+    }
+
+    // Send to backend to store in session
+    fetch("{% url 'store_address_session' %}", {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(addressData)
+    })
+    .then(res => res.json())
+    .then(data => {
+        loader.style.display = "none";
+        if (data.success) {
+             function closeModal() {
+  const modalElement = document.getElementById('checkoutModal'); 
+  const modalInstance = bootstrap.Modal.getInstance(modalElement);
+  modalInstance.hide();
+}
+closeModal();
+
+            if (rzp1) rzp1.open();  
+        } else {
+            showPopup("Oops! sorry", "Failed to save address. Try again.", "cart");
+        }
+    })
+    .catch(err => {
+        loader.style.display = "none";
+        showPopup("Oops! sorry", "Unexpected error occurred.", "cart");
+    });
+});
+
+    
+        //  Calculate Total Cart Amount
+        const nodes = document.querySelectorAll('.amt');
+        const arr = Array.from(nodes);
+        const res = arr.reduce((acc, curr) => {
+            const value = parseFloat(curr.textContent.trim().split('₹')[1], 10);
+            if (!isNaN(value)) {
+                acc += value;
+            }
+            return acc;
+        }, 0);
+        document.getElementById("net").innerHTML = '₹' + res;
+        document.getElementById("totalAmount").innerText=`Total: ₹${res}`;
+    });
+});  
+    // Function to show the popup
+    function showPopup(greeting, message, hint) {
+        console.log("showPopup() called:", greeting, message);
+        const popup = document.getElementById('popup');
+        const popupBox = document.getElementById('popupbox');
+        const greet = document.getElementById('greet');
+        const msg = document.getElementById('msg');
+        const closePopupBtn = document.getElementById('closePopup');
+        const img = document.getElementById('popImg');
+    
+        greet.innerHTML = greeting;
+        msg.innerHTML = message;
+    
+        if (greeting === 'Oops! sorry') {
+            img.src = "{% static 'images/wrong1.jpeg' %}";
+            closePopupBtn.style.backgroundColor = "red";
+        } else {
+            img.src = "{% static 'images/tick.jpeg' %}";
+            closePopupBtn.style.backgroundColor = "#31d109";
+        }
+    
+          // Ensure the popup is displayed
+          popup.style.display = "block";
+     
+        
+        // Close button event
+        closePopupBtn.onclick = function() {
+            console.log("Popup closed!");
+            popup.style.display = "none";
+            if(hint == 'order'){
+                window.location.href = "{% url 'orders' %}";   
+            }
+            else if(hint == 'cart'){
+                window.location.href = "{% url 'cart' %}";
+            }
+            
+        };
+    
+        // Close when clicking outside
+        window.onclick = function(event) {
+            if (event.target === popup) {
+                popup.style.display = "none";
+                if(hint == 'order'){
+                    window.location.href = "{% url 'orders' %}";   
+                }
+                else{
+                    window.location.href = "{% url 'cart' %}";
+                }
+            }
+        };
+    }
+    
+    </script>
  {% endblock content %}   

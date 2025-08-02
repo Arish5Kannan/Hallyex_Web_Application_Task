@@ -92,7 +92,7 @@ Admin | Products
 {% endfor %}
 
 {% include "shop/admin/product/modals/add_product_modal.html" %}
-{% include "shop/inc/footer.html" %}
+{% include "shop/inc/footerAdmin.html" %}
 
 <script>
   $(document).ready(function () {
@@ -102,12 +102,12 @@ Admin | Products
       responsive: true,
       scrollX: true,
       dom: '<"d-flex justify-content-between align-items-center mb-3"B>rt<"d-flex justify-content-between align-items-center mt-3"lip>',
-      buttons: [
+       buttons: [
         { extend: 'csvHtml5', className: 'btn btn-sm btn-primary' },
         { extend: 'excelHtml5', className: 'btn btn-sm btn-primary' },
         { extend: 'pdfHtml5', className: 'btn btn-sm btn-primary' },
         { extend: 'print', className: 'btn btn-sm btn-primary' }
-      ],
+      ], 
       columnDefs: [
         {
           targets: 0,

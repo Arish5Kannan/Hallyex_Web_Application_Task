@@ -1,0 +1,64 @@
+<div class="container-fluid">
+
+  <!-- Order Info -->
+  <div class="bg-light rounded p-3 mb-3 shadow-sm">
+    <h6 class="fw-semibold mb-3">Order Summary</h6>
+    <p class="mb-1"><strong>Customer:</strong> {{ order.user.email }}</p>
+    <p class="mb-1"><strong>Order Date:</strong> {{ order.created_at|date:"d M Y, h:i A" }}</p>
+    <p class="mb-1">
+      <strong>Status:</strong>
+      <span class="badge 
+        {% if order.order_status == 'Pending' %} bg-warning 
+        {% elif order.order_status == 'Shipped' %} bg-info 
+        {% elif order.order_status == 'Processing' %} bg-primary
+        {% elif order.order_status == 'Cancelled' %} bg-danger
+        {% elif order.order_status == 'Deliverd' %} bg-success 
+        {% else %} bg-secondary 
+        {% endif %}">
+        {{ order.order_status }}
+      </span>
+    </p>
+    <p class="mb-0"><strong>Total:</strong> ₹{{ order.total_price }}</p>
+  </div>
+
+  <!-- Shipping Address -->
+  <div class="bg-light rounded p-3 mb-3 shadow-sm">
+    <h6 class="fw-semibold mb-3">Shipping Address</h6>
+    <div class="row">
+      <div class="col-md-6">
+        <p class="mb-1"><strong>Address Line 1:</strong> {{ order.address_line1 }}</p>
+        <p class="mb-1"><strong>Address Line 2:</strong> {{ order.address_line2 }}</p>
+        <p class="mb-1"><strong>City:</strong> {{ order.city }}</p>
+      </div>
+      <div class="col-md-6">
+        <p class="mb-1"><strong>State:</strong> {{ order.state }}</p>
+        <p class="mb-1"><strong>Zip Code:</strong> {{ order.zipcode }}</p>
+        <p class="mb-0"><strong>Country:</strong> {{ order.country }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Items -->
+  <div class="bg-white rounded p-3 shadow-sm">
+    <h6 class="fw-semibold mb-3">Order Items</h6>
+    <ul class="list-group">
+      {% for item in items %}
+      <li class="list-group-item px-2 py-3">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <img src="{{ item.product.product_image.url }}" class="rounded me-3" style="height: 60px; width: 60px;" alt="{{ item.product.name }}">
+            <div>
+              <div class="fw-semibold">{{ item.product.name }}</div>
+              <small class="text-muted">Qty: {{ item.quantity }}</small>
+            </div>
+          </div>
+          <div class="text-end">
+            <strong>₹{{ item.price }}</strong>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>

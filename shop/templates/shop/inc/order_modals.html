@@ -1,0 +1,95 @@
+<!-- Order Update Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form id="statusUpdateForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Order Status</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="order-id">
+        <div class="mb-3">
+          <label for="status" class="form-label">Status</label>
+          <select id="status" class="form-select">
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Update</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Order Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        {% include "shop/partials/order_details_partial.html" %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Update Shipping Modal -->
+ <div class="modal fade" id="editShippingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="editShippingForm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Shipping Address</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          {% csrf_token %}
+          <input type="hidden" id="shippingOrderId">
+          <div class="mb-2"><input type="text" id="address_line1" class="form-control" placeholder="Address Line 1"></div>
+          <div class="mb-2"><input type="text" id="address_line2" class="form-control" placeholder="Address Line 2"></div>
+          <div class="mb-2"><input type="text" id="city" class="form-control" placeholder="City"></div>
+          <div class="mb-2"><input type="text" id="state" class="form-control" placeholder="State"></div>
+          <div class="mb-2"><input type="text" id="zipcode" class="form-control" placeholder="Zipcode"></div>
+          <div class="mb-2"><input type="text" id="country" class="form-control" placeholder="Country"></div>
+          <div class="mb-2"><input type="text" id="phone" class="form-control" placeholder="Phone"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Update Address</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteOrderModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" id="deleteOrderForm" class="modal-content">
+      {% csrf_token %}
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Confirm Delete</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this order?
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

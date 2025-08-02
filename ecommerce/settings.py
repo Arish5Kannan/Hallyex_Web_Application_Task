@@ -94,6 +94,11 @@ TEMPLATES = [
     },
 ]
 
+TEMPLATES[0]['OPTIONS']['context_processors'] += [
+    'shop.context_processors.branding_context',
+]
+
+
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 
