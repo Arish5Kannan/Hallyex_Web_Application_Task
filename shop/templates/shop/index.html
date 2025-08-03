@@ -6,7 +6,6 @@ ShopKart | Online shopping
  {% load static %}
  <style>
   .typewriter-text {
-    font-family: monospace;
     white-space: nowrap;
     overflow: hidden;
     border-right: 2px solid #333;
@@ -24,7 +23,7 @@ ShopKart | Online shopping
 <div class="container-fluid py-5 rounded-0  shadow-none" style="background-color:black;">
   <div class="text-center">
     <h2 class="display-6 fw-semibold"
-        style="color:{{ branding.primary_color | default:'white' }}; font-family: {{ branding.font_family }};">
+        style="color:{{ branding.primary_color | default:'white' }}; font-family: {{ branding.font_family | default:'sans-serif'}};">
       Welcome to {{ branding.name|default:"ShopKart, Find your needs" }}
     </h2>
 

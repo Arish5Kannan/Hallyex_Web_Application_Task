@@ -1,7 +1,7 @@
 body, html {
     margin: 0;
     padding: 0;
-    font-family:{{branding.font_family | default:'Arial,sans-serif'}};
+    font-family:{{ branding.font_family | default:'sans-serif'}};
 }
 
   /* Custom styles for a cleaner, more professional look

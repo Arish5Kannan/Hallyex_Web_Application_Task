@@ -773,7 +773,7 @@ def delete_customer(request, user_id):
     if request.method == "POST":      
         messages.success(request,f"User {user.first_name}{user.last_name} deleted successfully")
         user.delete()
-        return redirect('/adminDashboard/')
+        return redirect('admin_customers')
     return HttpResponseForbidden()
 
 
