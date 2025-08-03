@@ -7,7 +7,7 @@ def is_color_dark(hex_color):
     """
     hex_color = hex_color.lstrip('#')
 
-    # If shorthand color (e.g., #333), expand to full form (#333333)
+    
     if len(hex_color) == 3:
         hex_color = ''.join([c*2 for c in hex_color])
 
